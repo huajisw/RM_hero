@@ -74,8 +74,8 @@ float Gimbal_Motor_Pitch_Set_Add;
 #define Yaw_Max_Angle 1.9f
 #define Yaw_Min_Angle -1.9f
 
-#define Pitch_Max_Angle 0.5f
-#define Pitch_Min_Angle -0.5f
+#define Pitch_Max_Angle 0.4f
+#define Pitch_Min_Angle -0.3f
 
 #define Pitch_IMU_Max_Angle 0
 #define Pitch_IMU_Min_Angle 0
@@ -122,14 +122,14 @@ static void Angle_Control_Limit(float *Angle_Set,float Max_Angle,float Min_Angle
 #define Gimbal_Yaw_Motor_Angle_Maxout 10
 #define Gimbal_Yaw_Motor_Angle_IMaxout 10
 
-#define Gimbal_Yaw_IMU_Angle_Kp 5
-#define Gimbal_Yaw_IMU_Angle_Ki 0
-#define Gimbal_Yaw_IMU_Angle_Kd 950
+#define Gimbal_Yaw_IMU_Angle_Kp 10
+#define Gimbal_Yaw_IMU_Angle_Ki 0.05
+#define Gimbal_Yaw_IMU_Angle_Kd 1200
 #define Gimbal_Yaw_IMU_Angle_Maxout 9
 #define Gimbal_Yaw_IMU_Angle_IMaxout 0
 
 #define Gimbal_Yaw_Speed_Kp 9000
-#define Gimbal_Yaw_Speed_Ki 5
+#define Gimbal_Yaw_Speed_Ki 0
 #define Gimbal_Yaw_Speed_Kd 0
 #define Gimbal_Yaw_Speed_Maxout 25000
 #define Gimbal_Yaw_Speed_IMaxout 5000
@@ -682,7 +682,7 @@ float Gimbal_Pitch_Now_Angle,Gimbal_Pitch_Target_Angle;
 
 int Gimbal_Turn_Head_Flag,Gimbal_Turn_Head_Flag_Last,Gimbal_Key_Board_Last;
 float Gimbal_Turn_Head_Angle_Add,Gimbal_Turn_Head_Angle_Limit;
-//float Jscope_IMU_now_yaw_angle,Jscope_IMU_set_yaw_angle;
+float Jscope_IMU_now_yaw_angle,Jscope_IMU_set_yaw_angle;
 
 //云台陀螺仪控制，无限制模式
 void Gimbal_IMU_Control_NL_Set(Gimbal_t* Gimbal_Control_Set)
@@ -744,8 +744,8 @@ void Gimbal_IMU_Control_NL_Set(Gimbal_t* Gimbal_Control_Set)
 	Gimbal_Math_pid_calc(&Gimbal_Control_Set->Gimbal_Yaw_IMU_Angle_Pid,\
 	Gimbal_Control_Set->Gimbal_Yaw_Msg_t.Gimbal_IMU_Angle_Msg,Gimbal_Control_Set->Gimbal_Yaw_Control_Data);
 	
-//	Jscope_IMU_now_yaw_angle =  Gimbal_Control_Set->Gimbal_Yaw_Msg_t.Gimbal_IMU_Angle_Msg;
-//	Jscope_IMU_set_yaw_angle =  Gimbal_Control_Set->Gimbal_Yaw_Control_Data;
+	Jscope_IMU_now_yaw_angle =  Gimbal_Control_Set->Gimbal_Yaw_Msg_t.Gimbal_IMU_Angle_Msg*1000;
+	Jscope_IMU_set_yaw_angle =  Gimbal_Control_Set->Gimbal_Yaw_Control_Data*1000;
 
 	Gimbal_Control_Set->Gimbal_Motor_Current_Send[0] = \
 	-pid_calc(&Gimbal_Control_Set->Gimbal_Yaw_Speed_Pid,\

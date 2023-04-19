@@ -104,68 +104,94 @@ void Shoot_Ready_To_Launch_Control(Shoot_Mode_t* Shoot_Mode_RTL,float Trigger_Sp
 	Last_Shoot_Key_Read = Shoot_key_READ;
 }
 
+void Shoot_Ready_To_Done_Control(Shoot_Mode_t* Shoot_Mode_RTL,float Trigger_Speed_Sett)
+{
+	//如果上一次微动开关闭合这一次松开
+	if((Last_Shoot_Key_Read == Shoot_Key_Open) && (Shoot_key_READ == Shoot_Key_Close))
+	{
+		
+		*Shoot_Mode_RTL = Shoot_Done;
+		Shoot.Shoot_Firc_Control.Trigger_Speed_Set = 0;
+		
+	}
+	
+	if(*Shoot_Mode_RTL == Shoot_Ready)
+	{
+		
+		Shoot_Trigger_Motor_Move(Trigger_Speed_Sett);
+		
+	}
+		
+	Last_Shoot_Key_Read = Shoot_key_READ;
+}
+
 
 int Shoot_Ready_Count = 0;
 //刚开始到发射准备，弹丸有一发在中间
-int Shoot_Key_Static , Last_Shoot_Key_static = 0;
+int Shoot_Key_Static = 0;
+int Last_Shoot_Key_static = Shoot_Key_Open;
 void Shoot_Start_To_Ready_Control(Shoot_Mode_t* Shoot_Mode_STR,float Trigger_Speed_Sett)
 {
 	Shoot_Key_Static = Shoot_key_READ;
-	//如果微动开关闭合一次，说明子弹到达，进入准备发射模式
-//   if(Shoot_Key_Static == Shoot_Key_Close && Last_Shoot_Key_static == Shoot_Key_Open && (*Shoot_Mode_STR != Shoot_Ready))
-//	 {
-//		 Shoot_Ready_Count = 0;
-//		*Shoot_Mode_STR = Shoot_Ready;
-//		Shoot.Shoot_Firc_Control.Trigger_Speed_Set = 0;	 
-//	 }
-//	 //如果微动开关处于常开的状态，且当前模式不是准备发射模式，则启动拨弹电机
-//	 if(Shoot_Key_Static == Shoot_Key_Open && Last_Shoot_Key_static ==Shoot_Key_Open &&  (*Shoot_Mode_STR != Shoot_Ready))
-//	 {
-//	    Shoot_Ready_Count++; 
-//	 } 
-//	 else if((Shoot_Ready_Count >= Shoot_Step_Time) && (Shoot_Key_Static == Shoot_Key_Open)&& (*Shoot_Mode_STR != Shoot_Ready))
-//	 {
-//		  Shoot_Trigger_Motor_Move(Trigger_Speed_Sett);		
-//	 }
+	//如果微动开关闭合一次，说明子弹到达，进入准备发射模式1
+   if(Shoot_Key_Static == Shoot_Key_Close && (*Shoot_Mode_STR != Shoot_Ready1))
+	 {
+			*Shoot_Mode_STR = Shoot_Ready1; 
+	 }
+	 if(Shoot_Key_Static == Shoot_Key_Open && Last_Shoot_Key_static == Shoot_Key_Close && (*Shoot_Mode_STR != Shoot_Ready))
+	 {
+			Shoot_Ready_Count = 0;
+			Shoot.Shoot_Firc_Control.Trigger_Speed_Set = 0;	
+			*Shoot_Mode_STR = Shoot_Ready; 
+	 }
+	 
+	 if(*Shoot_Mode_STR != Shoot_Ready)
+	 {
+			Shoot_Trigger_Motor_Move(Trigger_Speed_Sett);
+	 }
   
 	
-	//如果微动开关闭合，说明子弹到达，进入准备发射模式
-	if(Shoot_key_READ == Shoot_Key_Close && Last_Shoot_Key_static == Shoot_Key_Close)
-	{
+//	//如果微动开关闭合，说明子弹到达，进入准备发射模式
+//	if(Shoot_key_READ == Shoot_Key_Close && Last_Shoot_Key_static == Shoot_Key_Close)
+//	{
 
-		Shoot_Ready_Count = 0;
-		*Shoot_Mode_STR = Shoot_Ready;
-		Shoot.Shoot_Firc_Control.Trigger_Speed_Set = 0;
-	}
-	
-	//如果微动开关松开，说明子弹没有到达
-	if((Shoot_Ready_Count < Shoot_Step_Time) &&(Shoot_key_READ == Shoot_Key_Open) && (*Shoot_Mode_STR != Shoot_Ready))
-	{
-		Shoot_Ready_Count++;
-	}
-	
-	else if((Shoot_Ready_Count >= Shoot_Step_Time) && (Shoot_key_READ == Shoot_Key_Open)&& (*Shoot_Mode_STR != Shoot_Ready))
-	{
-		Shoot_Trigger_Motor_Move(Trigger_Speed_Sett);	
-	}
+//		Shoot_Ready_Count = 0;
+//		*Shoot_Mode_STR = Shoot_Ready;
+//		Shoot.Shoot_Firc_Control.Trigger_Speed_Set = 0;
+//	}
+//	
+//	//如果微动开关松开，说明子弹没有到达
+//	if((Shoot_Ready_Count < Shoot_Step_Time) &&(Shoot_key_READ == Shoot_Key_Open) && (*Shoot_Mode_STR != Shoot_Ready))
+//	{
+//		Shoot_Ready_Count++;
+//	}
+//	
+//	else if((Shoot_Ready_Count >= Shoot_Step_Time) && (Shoot_key_READ == Shoot_Key_Open)&& (*Shoot_Mode_STR != Shoot_Ready))
+//	{
+//		Shoot_Trigger_Motor_Move(Trigger_Speed_Sett);	
+//	}
 	
 	Last_Shoot_Key_static = Shoot_Key_Static;
-	
-	
+
 }
 
 void Shoot_Single_Launch_Control(Shoot_Num_Mode_t* Shoot_Num_Mode_SL,Shoot_Mode_t* Shoot_Mode_SL,float Trigger_Speed_Sett)
 {
 	static int Last_Shoot_Key_Read;
 	
+//	if(*Shoot_Mode_SL == Shoot_Ready) 
+//	{
+//		Shoot_Ready_To_Launch_Control(Shoot_Mode_SL,Trigger_Speed_Sett); //发射准备到发射完成
+//	}
+//	else if(*Shoot_Mode_SL == Shoot_Launch) 
+//	{
+//		Shoot_Launch_To_Done_Control(Shoot_Mode_SL,Trigger_Speed_Sett); //发射完成到发射结束
+//	}
 	if(*Shoot_Mode_SL == Shoot_Ready) 
 	{
-		Shoot_Ready_To_Launch_Control(Shoot_Mode_SL,Trigger_Speed_Sett); //发射准备到发射完成
+		Shoot_Ready_To_Done_Control(Shoot_Mode_SL,Trigger_Speed_Sett); //发射准备到发射完成
 	}
-	else if(*Shoot_Mode_SL == Shoot_Launch) 
-	{
-		Shoot_Launch_To_Done_Control(Shoot_Mode_SL,Trigger_Speed_Sett); //发射完成到发射结束
-	}
+	
 	else if(*Shoot_Mode_SL == Shoot_Done)
 	{
 		*Shoot_Mode_SL = Shoot_Ready;
@@ -577,7 +603,7 @@ void Shoot_Task(void *pvParameters)
 		Shoot_Motor_State_Get(&Shoot);
 		//裁判系统发射限制
 		//Shoot_Judge_Data_Check(&Shoot,&Shoot_Fric_Speed_Sett,&Trigger_Speed_Sett); 
-		Trigger_Speed_Sett = 5;
+		Trigger_Speed_Sett = 6;
 		
 		Shoot_Control_Data_Get(&Shoot,Shoot_Fric_Speed_Sett,Trigger_Speed_Sett);
 		

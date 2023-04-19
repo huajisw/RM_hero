@@ -106,16 +106,12 @@
 typedef enum
 {
 	Shoot_Stop = 0,
-	Shoot_Ready = 1,//发射准备
-	Shoot_Start = 2,//发射启动 (没有用)
-	Shoot_Done = 3,//单发结束
-	Shoot_Back = 4,//卡单
-	Shoot_Launch = 5,//发射完成
-	Shoot_Test2 = 6,
-	Shoot_Test3 = 7,
-	Shoot_Test4 = 8,
-	Shoot_Test5 = 9,
-	Shoot_Test6 = 10
+	Shoot_Ready1 = 1,//发射准备
+	Shoot_Ready = 2,
+	Shoot_Start = 3,//发射启动 (没有用)
+	Shoot_Done = 4,//单发结束
+	Shoot_Back = 5,//卡单
+	Shoot_Launch = 6,//发射完成
 }Shoot_Mode_t;
 
 
