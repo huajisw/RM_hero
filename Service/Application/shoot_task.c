@@ -337,18 +337,20 @@ void Shoot_Control_Data_Set(Shoot_t* Shoot_Control_D,float Fric_Speed_Set,float 
 	  
 		if((Shoot_Control_D->Shoot_Mode != Shoot_Ready) && (Shoot_Control_D->Shoot_Num_Mode == Shoot_Motor_Ready))
 		{
-			Shoot_Start_To_Ready_Control(&Shoot_Control_D->Shoot_Mode,trigger_Speed_Set);
+			//Shoot_Start_To_Ready_Control(&Shoot_Control_D->Shoot_Mode,trigger_Speed_Set);
 		}	
 
 			
 		//拨弹轮电机控制
 		if(Shoot_Control_D->Shoot_Num_Mode == Shoot_Once) //单发
 		{
-			Shoot_Single_Launch_Control(&Shoot_Control_D->Shoot_Num_Mode,&Shoot_Control_D->Shoot_Mode,trigger_Speed_Set);
+			//Shoot_Single_Launch_Control(&Shoot_Control_D->Shoot_Num_Mode,&Shoot_Control_D->Shoot_Mode,trigger_Speed_Set);
+			Shoot_Trigger_Motor_Move(0);
 		}
 		else if(Shoot_Control_D->Shoot_Num_Mode == Shoot_Long) //连发 
 		{
-			Shoot_Long_Launch_Control(&Shoot_Control_D->Shoot_Num_Mode,&Shoot_Control_D->Shoot_Mode,trigger_Speed_Set);
+			//Shoot_Long_Launch_Control(&Shoot_Control_D->Shoot_Num_Mode,&Shoot_Control_D->Shoot_Mode,trigger_Speed_Set);
+			Shoot_Trigger_Motor_Move(6);
 		}
 
 
@@ -511,7 +513,7 @@ void Shoot_Init(Shoot_t*  Shoot_Data_Init)
 	Shoot_Data_Init->Shoot_Mode = Shoot_Stop;
 	
 	//裁判系统数据获取
-	Shoot_Data_Init->Shoot_Judge_Msg.Shoot_Judge_Mes_Get = get_Judge_Mes_Add();
+	Shoot_Data_Init->Shoot_Judge_Msg.Shoot_Judge_Mes_Get = Get_Judge_Info();
 	Shoot_Data_Init->Shoot_Judge_Msg.Shoot_Speed_Limit = (float)Shoot_Data_Init->Shoot_Judge_Msg.Shoot_Judge_Mes_Get->Judge_game_robot_status.shooter_id1_42mm_speed_limit;
 	Shoot_Data_Init->Shoot_Judge_Msg.Shoot_Cool_Now = (float)Shoot_Data_Init->Shoot_Judge_Msg.Shoot_Judge_Mes_Get->Judge_game_robot_status.shooter_id1_42mm_cooling_rate;
 	Shoot_Data_Init->Shoot_Judge_Msg.Shoot_Heat_Limit = (int)Shoot_Data_Init->Shoot_Judge_Msg.Shoot_Judge_Mes_Get->Judge_game_robot_status.shooter_id1_42mm_cooling_limit;

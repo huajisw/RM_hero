@@ -41,7 +41,7 @@ typedef struct
 	
 	OLED_Display_Mode_t OLED_Display_Mode;
 	
-	DJI_Judge_Mes_t* DJI_Judge_Mes;
+	Judge_Info_t* DJI_Judge_Mes;
 	
 }OLED_t;
 

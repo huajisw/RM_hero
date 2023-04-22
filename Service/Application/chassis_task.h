@@ -17,8 +17,8 @@
 
 #define Chassis_Motor_Turn_Kp 12.5
 #define Chassis_Motor_Turn_Ki 0
-#define Chassis_Motor_Turn_Kd 0
-#define Chassis_Motor_Turn_Maxout 6
+#define Chassis_Motor_Turn_Kd 20
+#define Chassis_Motor_Turn_Maxout 10
 #define Chassis_Motor_Turn_IMaxout 0
 
 //底盘最大速度设置
@@ -59,7 +59,7 @@ typedef struct
 /*********裁判系统读取数据*********/
 typedef struct
 {
-	DJI_Judge_Mes_t* Chassis_Judge_Mes_Get;
+	Judge_Info_t* Chassis_Judge_Mes_Get;
 	//底盘功率数据
 	float Chassis_Power_Data_Get;
 	//底盘热量数据

@@ -17,7 +17,7 @@
 #include "power.h"
 
 
-#include "usart_judge.h"
+#include "Judge_Data.h"
 
 #include "imu_bsp.h"
 #include "wit_c_sdk.h"
@@ -41,6 +41,7 @@ int main(void)
 	delay_ms(10);
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4); 
+	__disable_irq();
 	Usb_Init();	
 	Led_Init();
 	
@@ -48,7 +49,6 @@ int main(void)
 
 	
 //	PC_Usart_Init();
-	DJI_Judge_Usart_Init();
 	
 	Adc_Init();
 	Power_24V_Init();
@@ -74,7 +74,8 @@ int main(void)
 	key_init();
 	Laser_Init();
 	Shoot_key_init();
-	
+	Judge_Usart_Init();
+	__enable_irq();
 	
 	startTast();
 	vTaskStartScheduler();//开启任务调度

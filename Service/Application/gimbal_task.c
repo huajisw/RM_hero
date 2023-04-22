@@ -122,8 +122,8 @@ static void Angle_Control_Limit(float *Angle_Set,float Max_Angle,float Min_Angle
 #define Gimbal_Yaw_Motor_Angle_Maxout 10
 #define Gimbal_Yaw_Motor_Angle_IMaxout 10
 
-#define Gimbal_Yaw_IMU_Angle_Kp 10
-#define Gimbal_Yaw_IMU_Angle_Ki 0.05
+#define Gimbal_Yaw_IMU_Angle_Kp 8
+#define Gimbal_Yaw_IMU_Angle_Ki 0
 #define Gimbal_Yaw_IMU_Angle_Kd 1200
 #define Gimbal_Yaw_IMU_Angle_Maxout 9
 #define Gimbal_Yaw_IMU_Angle_IMaxout 0
@@ -674,7 +674,7 @@ void Gimbal_Motor_Control_Data_Check(Gimbal_t* Gimbal_Data_Check)
 
 #define PI 3.14159265358979f
 //BUG[5.2]无法180°转头，角度有问题
-float Mouse_X_Set = 80000.0f,Mouse_Y_Set = 3000.0f;
+float Mouse_X_Set = 50000.0f,Mouse_Y_Set = 8500.0f;
 
 float Gimbal_Yaw_Now_Angle,Gimbal_Yaw_Target_Angle;
 

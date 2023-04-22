@@ -84,7 +84,7 @@ void Chassis_Init(Chassis_t* Chassis_Data_Init)
 	Chassis_Data_Init->Chassis_Motor_Msg[3].Chassis_Motor_Msg_Get = Get_DJI_Motor_Data(CAN1_RX,Chassis_Motor_RB);
 		
 	//裁判系统数据获取
-	Chassis_Data_Init->Chassos_Judge_Msg.Chassis_Judge_Mes_Get = get_Judge_Mes_Add();
+	Chassis_Data_Init->Chassos_Judge_Msg.Chassis_Judge_Mes_Get = Get_Judge_Info();
 	Chassis_Data_Init->Chassos_Judge_Msg.Chassis_Power_Data_Get = (float)Chassis_Data_Init->Chassos_Judge_Msg.Chassis_Judge_Mes_Get->Judge_power_heat_data.chassis_power;
 	Chassis_Data_Init->Chassos_Judge_Msg.Chassis_Heat_Data_Get = (int)Chassis_Data_Init->Chassos_Judge_Msg.Chassis_Judge_Mes_Get->Judge_power_heat_data.chassis_power_buffer;
 	Chassis_Data_Init->Chassos_Judge_Msg.Chassis_Max_Power_Data_Get = (int)Chassis_Data_Init->Chassos_Judge_Msg.Chassis_Judge_Mes_Get->Judge_game_robot_status.chassis_power_limit;
@@ -112,14 +112,14 @@ void Chassis_Motor_Data_Update(Chassos_Motor_Msg_t* Chassos_Motor_Msg_Update)
 	Chassos_Motor_Msg_Update->Chassis_Speed_Get = ((float)(Chassos_Motor_Msg_Update->Chassis_Motor_Msg_Get->speed)*0.0012708333f);///60*2*3.1415926 *152.5/2/1000
 }
 /*****超级电容数据更新函数*****/
-void Chassis_Cap_Data_Update(Chassis_Cap_Msg_t* Chassis_Cap_Msg_Update)
-{
-	Chassis_Cap_Msg_Update->Chassis_Cap_Power_Percent = ((float)(Chassis_Cap_Msg_Update->Chassis_Cap_Msg_Get->Voilt_C) / (float)(Chassis_Cap_Msg_Update->Chassis_Cap_Msg_Get->Voilt_In) * 100.00f);
-	if(Chassis_Cap_Msg_Update->Chassis_Cap_Msg_Get->Target_power != Chassis_Cap_Msg_Update->Chassis_Cap_Power_Set)
-			CAN1_Super_C_Send(0x210,Chassis_Cap_Msg_Update->Chassis_Cap_Power_Set);	
-	Chassis_Cap_Msg_Update->Chassis_Cap_Power_Set = Chassis_Cap_Msg_Update->Chassis_Cap_Msg_Get->Target_power;
-	//Chassis_Cap_Msg_Update
-}
+//void Chassis_Cap_Data_Update(Chassis_Cap_Msg_t* Chassis_Cap_Msg_Update)
+//{
+//	Chassis_Cap_Msg_Update->Chassis_Cap_Power_Percent = ((float)(Chassis_Cap_Msg_Update->Chassis_Cap_Msg_Get->Voilt_C) / (float)(Chassis_Cap_Msg_Update->Chassis_Cap_Msg_Get->Voilt_In) * 100.00f);
+//	if(Chassis_Cap_Msg_Update->Chassis_Cap_Msg_Get->Target_power != Chassis_Cap_Msg_Update->Chassis_Cap_Power_Set)
+//			CAN1_Super_C_Send(0x210,Chassis_Cap_Msg_Update->Chassis_Cap_Power_Set);	
+//	Chassis_Cap_Msg_Update->Chassis_Cap_Power_Set = Chassis_Cap_Msg_Update->Chassis_Cap_Msg_Get->Target_power;
+//	//Chassis_Cap_Msg_Update
+//}
 /*****裁判系统数据更新函数*****/
 void Chassis_Judge_Data_Update(Chassos_Judge_Msg_t* Chassos_Judge_Msg_Update)
 {
@@ -442,9 +442,9 @@ void Chassis_Mode_Spin(Chassis_t* Chassis_Spin_Set)
 			}
 		
 			
-			sin_yaw = arm_sin_f32(-*Chassis_Spin_Set->Chassis_Follow_Gimbal_Angle_TM);
+			sin_yaw = arm_sin_f32(*Chassis_Spin_Set->Chassis_Follow_Gimbal_Angle_TM);
 			
-      cos_yaw = arm_cos_f32(-*Chassis_Spin_Set->Chassis_Follow_Gimbal_Angle_TM);
+      cos_yaw = arm_cos_f32(*Chassis_Spin_Set->Chassis_Follow_Gimbal_Angle_TM);
 			
 			Chassis_Spin_Set->Chassis_X_Speed_Set = cos_yaw * Chassis_VX + sin_yaw * Chassis_VY;
 //			
@@ -606,7 +606,7 @@ void Chassis_Task(void *pvParameters)
 		Chassis_Control_Data_Get(&Chassis);
 		Chassis_PID_Calculate_Data(&Chassis);
 		
-//		chassis_power_control(&Chassis);
+		chassis_power_control(&Chassis);
 		
 		CAN1_Motor_Control(0x200,(int16_t)Chassis.Chassis_Motor_Curent_Send[0],(int16_t)Chassis.Chassis_Motor_Curent_Send[1],(int16_t)Chassis.Chassis_Motor_Curent_Send[2],(int16_t)Chassis.Chassis_Motor_Curent_Send[3]);
 

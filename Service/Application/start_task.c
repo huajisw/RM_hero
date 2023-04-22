@@ -14,15 +14,15 @@
 #include "Start_Task.h"
 #include "User_Task.h"
 #include "oled_task.h"
-#include "judge_task.h"
+//#include "judge_task.h"
 #include "IMU_task.h"
 #include "shoot_task.h"
-#include "Check_Task.h"
 #include "usb_task.h"
 
 
 #include "gimbal_task.h"
 #include "chassis_task.h"
+#include "supercap_task.h"
 
 #include "oled_list.h"
 
@@ -79,10 +79,14 @@ static TaskHandle_t UsbTask_Handler;
 #define CHECK_STK_SIZE 512
 static TaskHandle_t CheckTask_Handler;
 
+#define SUPERCAP_TASK_PRIO 25
+#define SUPERCAP_STK_SIZE 512
+TaskHandle_t SuperCapTask_Handler;
 
 void start_task(void *pvParameters)
 {
-    taskENTER_CRITICAL();
+    Judge_Data_Init();
+		taskENTER_CRITICAL();
 
     xTaskCreate((TaskFunction_t)UserTast,
 	  (const char *)"UserTast",
@@ -112,23 +116,21 @@ void start_task(void *pvParameters)
 		(const char *)"Shoot_Task",
 		(uint16_t)SHOOT_STK_SIZE,(void *)NULL,
 		(UBaseType_t)SHOOT_TASK_PRIO,
-		(TaskHandle_t *)&ShootTask_Handler);	
-		
-		xTaskCreate((TaskFunction_t)Check_Task,  //超级电容通信
-		(const char *)"Check_Task",
-		(uint16_t)CHECK_STK_SIZE,
-		(void *)NULL,
-		(UBaseType_t)CHECK_TASK_PRIO,
-		(TaskHandle_t *)&CheckTask_Handler);
+		(TaskHandle_t *)&ShootTask_Handler);
 
-		xTaskCreate((TaskFunction_t)Judge_Task, // 裁判系统通信任务 
-		(const char *)"Judge_Task",
-		(uint16_t)JUDGE_STK_SIZE,
+		xTaskCreate((TaskFunction_t)supercap_task,
+	  (const char *)"SuperCap_Task",
+	  (uint16_t)SUPERCAP_STK_SIZE,
 		(void *)NULL,
-		(UBaseType_t)JUDGE_TASK_PRIO,
-		(TaskHandle_t *)&JudgeTask_Handler);			
-		
-		
+		(UBaseType_t)SUPERCAP_TASK_PRIO,
+		(TaskHandle_t *)&SuperCapTask_Handler);	
+
+//		xTaskCreate((TaskFunction_t)Judge_Task, // 裁判系统通信任务 
+//		(const char *)"Judge_Task",
+//		(uint16_t)JUDGE_STK_SIZE,
+//		(void *)NULL,
+//		(UBaseType_t)JUDGE_TASK_PRIO,
+//		(TaskHandle_t *)&JudgeTask_Handler);			
 				
     vTaskDelete(StartTask_Handler); //删除开始任务
     taskEXIT_CRITICAL();            //退出临界区

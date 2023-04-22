@@ -1,9 +1,7 @@
 #include "can.h"
-
-struct dipandianji dipan1,dipan2,dipan3,dipan4;
+#include "freertos_usr_lib.h"
 
 Motor_Msg_t ALL_Motor_Msg[20];
-
 Super_C_Msg_t Super_C_Msg;
 
 /**
@@ -129,63 +127,6 @@ void CAN2_Init(void)
     NVIC_Init(&NVIC_InitStructure);
 }
 
-
-void CAN1_Super_C_Send(int16_t Stdid,uint16_t data)
-{
-    CanTxMsg tx_message;
-    tx_message.RTR = CAN_RTR_DATA;  //Êı¾İÖ¡
-    tx_message.IDE = CAN_ID_STD;    //±ê×¼Ö¡
-    tx_message.DLC = 0x08;          //Ö¡³¤¶ÈÎª   
-	
-		tx_message.StdId = Stdid;
-		tx_message.Data[0] =(uint8_t)((data>> 8)&0xff);
-		tx_message.Data[1] =(uint8_t)(data&0xff);
-		
-    CAN_Transmit(CAN1,&tx_message);
-}
-
-
-void CAN2_Supercapacitors_Send_0x2E(int16_t Stdid,u16 num1,u16 num2,u16 num3,u16 num4)
-{
-    CanTxMsg tx_message;
-    tx_message.RTR = CAN_RTR_DATA;  //Êı¾İÖ¡
-    tx_message.IDE = CAN_ID_STD;    //±ê×¼Ö¡
-    tx_message.DLC = 0x08;          //Ö¡³¤¶ÈÎª   
-	
-		tx_message.StdId = Stdid;	
-		tx_message.Data[0] =(uint8_t)((num1>> 8)&0xff);
-		tx_message.Data[1] =(uint8_t)(num1&0xff);
-	  tx_message.Data[2] =(uint8_t)((num2>> 8)&0xff);
-		tx_message.Data[3] =(uint8_t)(num2&0xff);
-	  tx_message.Data[4] =(uint8_t)((num3>> 8)&0xff);
-		tx_message.Data[5] =(uint8_t)(num3&0xff);
-		tx_message.Data[6] =(uint8_t)((num4>> 8)&0xff);
-		tx_message.Data[7] =(uint8_t)(num4&0xff);
-	 	
-    CAN_Transmit(CAN1,&tx_message);
-}
-
-void CAN2_Supercapacitors_Send_0x2F(int16_t Stdid,u16 num1,u16 num2,u16 num3,u16 num4)
-{
-    CanTxMsg tx_message;
-    tx_message.RTR = CAN_RTR_DATA;  //Êı¾İÖ¡
-    tx_message.IDE = CAN_ID_STD;    //±ê×¼Ö¡
-    tx_message.DLC = 0x08;          //Ö¡³¤¶ÈÎª   
-	
-		tx_message.StdId = Stdid;	
-		tx_message.Data[0] =(uint8_t)((num1>> 8)&0xff);
-		tx_message.Data[1] =(uint8_t)(num1&0xff);
-	  tx_message.Data[2] =(uint8_t)((num2>> 8)&0xff);
-		tx_message.Data[3] =(uint8_t)(num2&0xff);
-	  tx_message.Data[4] =(uint8_t)((num3>> 8)&0xff);
-		tx_message.Data[5] =(uint8_t)(num3&0xff);
-	  tx_message.Data[6] =(uint8_t)((num4>> 8)&0xff);
-		tx_message.Data[7] =(uint8_t)(num4&0xff);
-	 	
-    CAN_Transmit(CAN1,&tx_message);
-}
-
-
 void CAN1_Motor_Control(int16_t stdid,u16 num1,u16 num2,u16 num3,u16 num4)
 {
     CanTxMsg tx_message;
@@ -223,6 +164,26 @@ void CAN2_Motor_Control(int16_t stdid,u16 num1,u16 num2,u16 num3,u16 num4)
     tx_message.Data[7] =(unsigned char)(num4&0xff);
 	
    CAN_Transmit(CAN2,&tx_message);
+}
+
+void CAN1_SuperCap_Control(int16_t Stdid,uint16_t num1,uint16_t num2,uint16_t num3,uint16_t num4)
+{
+    CanTxMsg tx_message;
+    tx_message.RTR = CAN_RTR_DATA;  //Êı¾İÖ¡
+    tx_message.IDE = CAN_ID_STD;    //±ê×¼Ö¡
+    tx_message.DLC = 0x08;          //Ö¡³¤¶ÈÎª   
+	
+		tx_message.StdId = Stdid;	
+		tx_message.Data[0] =(uint8_t)((num1>> 8)&0xff);
+		tx_message.Data[1] =(uint8_t)(num1&0xff);
+	  tx_message.Data[2] =(uint8_t)((num2>> 8)&0xff);
+		tx_message.Data[3] =(uint8_t)(num2&0xff);
+	  tx_message.Data[4] =(uint8_t)((num3>> 8)&0xff);
+		tx_message.Data[5] =(uint8_t)(num3&0xff);
+		tx_message.Data[6] =(uint8_t)((num4>> 8)&0xff);
+		tx_message.Data[7] =(uint8_t)(num4&0xff);
+	 	
+    CAN_Transmit(CAN1,&tx_message);
 }
 
 /*************************************************************************
@@ -326,68 +287,67 @@ void Can1ReceiveMsgProcess(CanRxMsg *can_receive_message) 	//´«Èë½ÓÊÕµ½Êı¾İµÄÖ¸Õ
 		case 0x201:				
 					ALL_Motor_Msg[0].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[0].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[0].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
+					ALL_Motor_Msg[0].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
 		      Angle_Count_Long(&ALL_Motor_Msg[0]);
 			break;
 		case 0x202:				
 					ALL_Motor_Msg[1].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[1].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[1].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
+					ALL_Motor_Msg[1].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
           Angle_Count_Long(&ALL_Motor_Msg[1]);		
 			break;	
 		case 0x203:				
 					ALL_Motor_Msg[2].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[2].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[2].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
+					ALL_Motor_Msg[2].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
           Angle_Count_Long(&ALL_Motor_Msg[2]);		
 			break;	
 		case 0x204:				
 					ALL_Motor_Msg[3].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[3].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[3].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
+					ALL_Motor_Msg[3].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
           Angle_Count_Long(&ALL_Motor_Msg[3]);		
 			break;	
 		case 0x205:	
 					ALL_Motor_Msg[4].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[4].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[4].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
+					ALL_Motor_Msg[4].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
           Angle_Count_Long(&ALL_Motor_Msg[4]);		
 			break;	
 		case 0x206:			
 					ALL_Motor_Msg[5].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[5].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[5].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
+					ALL_Motor_Msg[5].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
           Angle_Count_Long(&ALL_Motor_Msg[5]);		
 			break;	
 		case 0x207:				
 					ALL_Motor_Msg[6].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[6].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[6].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
+					ALL_Motor_Msg[6].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
           Angle_Count_Long(&ALL_Motor_Msg[6]);		
 			break;	
 		case 0x208:				
 					ALL_Motor_Msg[7].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[7].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[7].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
+					ALL_Motor_Msg[7].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
           Angle_Count_Long(&ALL_Motor_Msg[7]);		
 			break;
 		case 0x209:				
 					ALL_Motor_Msg[16].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[16].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[16].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
+					ALL_Motor_Msg[16].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
 			break;
 		case 0x20A:				
 					ALL_Motor_Msg[17].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[17].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[17].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
+					ALL_Motor_Msg[17].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
 			break;
-		case 0x211:				
-					Super_C_Msg.Voilt_In=(uint16_t)((can_receive_message->Data[1] << 8) + (can_receive_message->Data[0]));//ÊäÈëµçÑ¹
-					Super_C_Msg.Voilt_C=(uint16_t)((can_receive_message->Data[3] << 8) + (can_receive_message->Data[2]));//µçÈİµçÑ¹
-					Super_C_Msg.Current_In=(uint16_t)((can_receive_message->Data[5] << 8) + (can_receive_message->Data[4]));//ÊäÈëµçÁ÷	
-					Super_C_Msg.Target_power=((uint16_t)(can_receive_message->Data[7] << 8) + (can_receive_message->Data[6]));//Ä¿±ê¹¦ÂÊ	
+		case 0x030:		
+					Super_C_Msg.Cap_V=(int16_t)((uint16_t)(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]));//ÊäÈëµçÑ¹
+					Super_C_Msg.Cap_I=(int16_t)((uint16_t)(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]));//µçÈİµçÑ¹
+					Super_C_Msg.Cap_State=(uint16_t)((can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]));//ÊäÈëµçÁ÷		
+					Super_C_Msg.Timestamp = xTaskGetTickCountFromISR();
 			break;
-		
 		}
 }
 
@@ -400,44 +360,43 @@ void Can2ReceiveMsgProcess(CanRxMsg *can_receive_message) 	//´«Èë½ÓÊÕµ½Êı¾İµÄÖ¸Õ
 		case 0x201:				
 					ALL_Motor_Msg[8].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[8].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[8].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
+					ALL_Motor_Msg[8].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
 			break;
 		case 0x202:				
 					ALL_Motor_Msg[9].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[9].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[9].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
+					ALL_Motor_Msg[9].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
 			break;	
 		case 0x203:				
 					ALL_Motor_Msg[10].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[10].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[10].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
+					ALL_Motor_Msg[10].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
 			break;	
 		case 0x204:				
 					ALL_Motor_Msg[11].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[11].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[11].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
+					ALL_Motor_Msg[11].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
 			break;	
 		case 0x205:	
 					ALL_Motor_Msg[12].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[12].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[12].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
+					ALL_Motor_Msg[12].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
 			break;	
 		case 0x206:			
 					ALL_Motor_Msg[13].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[13].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[13].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
+					ALL_Motor_Msg[13].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
 			break;	
 		case 0x207:				
 					ALL_Motor_Msg[14].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[14].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[14].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
+					ALL_Motor_Msg[14].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
 			break;	
 		case 0x208:				
 					ALL_Motor_Msg[15].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úĞµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[15].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[15].dianliu=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
+					ALL_Motor_Msg[15].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
 			break;	
-		
 		}
 }
 

@@ -29,56 +29,34 @@ typedef enum
 
 #define M2006_Speed_Change 0.0004629630
 
-#define Fric_Motor_Speed_Change 0.0031415926
-
-struct dipandianji
-{
-	int angle;//机械角度
-	int speed;//速度
-	int dianliu;
-};
-
 //电容相关信息
 typedef struct 
 {
-	uint16_t Voilt_In;//输入电压
-	uint16_t Voilt_C;//电容电压
-	uint16_t Current_In;//输入电流
-	uint16_t Target_power;//目标功率
-}Super_C_Msg_t;
+	int16_t Cap_I;//电容电流
+	int16_t Cap_V;//电容电压
+	uint16_t Cap_State;//电容状态
+	uint32_t Timestamp;
+}Super_C_Msg_t;;
 
 typedef struct 
 {
 	int16_t angle;//机械角度
 	int16_t speed;//速度
-	int16_t dianliu;
+	int16_t current;
 	int16_t temp;
 	int16_t Last_Angle;
 	int Angle_Long;
 }Motor_Msg_t;
 
-struct yuntaidianji
-{
-	int angle;//电机机械角度
-	int speed;//电机速度
-	int dianliu;//实际电流大小
-	int temperature;//电机温度
-};
-
 void CAN1_Init(void);
 void CAN2_Init(void);
 
-void CAN1_Motor_Control(int16_t stdid,u16 num1,u16 num2,u16 num3,u16 num4);
-void CAN2_Motor_Control(int16_t stdid,u16 num1,u16 num2,u16 num3,u16 num4);
-
-void CAN2_Supercapacitors_Send_0x2E(int16_t Stdid,u16 num1,u16 num2,u16 num3,u16 num4);
-void CAN2_Supercapacitors_Send_0x2F(int16_t Stdid,u16 num1,u16 num2,u16 num3,u16 num4);
-
+void CAN1_Motor_Control(int16_t stdid,uint16_t num1,uint16_t num2,uint16_t num3,uint16_t num4);
+void CAN2_Motor_Control(int16_t stdid,uint16_t num1,uint16_t num2,uint16_t num3,uint16_t num4);
+void CAN1_SuperCap_Control(int16_t Stdid,uint16_t num1,uint16_t num2,uint16_t num3,uint16_t num4);
 
 void Can1ReceiveMsgProcess(CanRxMsg *can_receive_message);
 void Can2ReceiveMsgProcess(CanRxMsg *can_receive_message);
-
-void CAN1_Super_C_Send(int16_t Stdid,uint16_t data);
 
 void Angle_Count_Long(Motor_Msg_t *ms);
 

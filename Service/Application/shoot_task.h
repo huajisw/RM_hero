@@ -65,7 +65,7 @@
 //1/60/36*10
 
 
-#define Shoot_Motor_Speed_Sett 13.2
+#define Shoot_Motor_Speed_Sett 13
 
 #define Trigger_Turn_Speed_Set Trigger_Speed_Set_Test
 
@@ -99,6 +99,8 @@
 
 #define Shoot_Key_Close 1
 #define Shoot_Key_Open 0
+
+#define Fric_Motor_Speed_Change 0.0031415926
 
 //拨弹轮速度设置
 
@@ -169,7 +171,7 @@ typedef struct
 /*********裁判系统读取数据*********/
 typedef struct
 {
-	DJI_Judge_Mes_t* Shoot_Judge_Mes_Get;
+	Judge_Info_t* Shoot_Judge_Mes_Get;
 	//当前射速上线
 	float Shoot_Speed_Limit;
 	//当前热量冷却值

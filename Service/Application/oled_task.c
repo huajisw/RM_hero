@@ -24,7 +24,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-extern DJI_Judge_Mes_t DJI_Judge_Mes;
+extern Judge_Info_t DJI_Judge_Mes;
 
 OLED_t OLED;
 
@@ -47,7 +47,7 @@ extern float motor_set[2];
 
 void Oled_Task(void *pvParameters)
 {
-	OLED.DJI_Judge_Mes = get_Judge_Mes_Add();
+	OLED.DJI_Judge_Mes = Get_Judge_Info();
 	OLED.OLED_Display_Mode = Oled_Display_On;
 	OLED.OLED_Show_Mode = DJI_Judge_Set;
 	while(1)
