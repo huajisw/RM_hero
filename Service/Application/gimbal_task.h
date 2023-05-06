@@ -169,6 +169,8 @@ typedef struct
 		
 	//云台发送电流值
 	float Gimbal_Motor_Current_Send[2];
+	//拨弹电机电流
+	float* Trigger_Motor_Current_Send;
 
 }Gimbal_t;
 

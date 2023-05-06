@@ -13,18 +13,12 @@
 */
 #include "Start_Task.h"
 #include "User_Task.h"
-#include "oled_task.h"
-//#include "judge_task.h"
 #include "IMU_task.h"
 #include "shoot_task.h"
 #include "usb_task.h"
-
-
 #include "gimbal_task.h"
 #include "chassis_task.h"
-#include "supercap_task.h"
-
-#include "oled_list.h"
+#include "judge_task.h"
 
 #include "FreeRTOSConfig.h"
 #include "FreeRTOS.h"
@@ -37,15 +31,6 @@ static TaskHandle_t StartTask_Handler;
 #define USER_TASK_PRIO 4
 #define USER_STK_SIZE 128
 static TaskHandle_t UserTask_Handler;
-
-#define OSKER_TASK_PRIO 6
-#define OSKER_STK_SIZE 512
-static TaskHandle_t OskerTask_Handler;
-
-
-#define OLED_TASK_PRIO 8
-#define OLED_STK_SIZE 512
-static TaskHandle_t OledTask_Handler;
 
 #define JUDGE_TASK_PRIO 10
 #define JUDGE_STK_SIZE 512
@@ -79,13 +64,12 @@ static TaskHandle_t UsbTask_Handler;
 #define CHECK_STK_SIZE 512
 static TaskHandle_t CheckTask_Handler;
 
-#define SUPERCAP_TASK_PRIO 25
-#define SUPERCAP_STK_SIZE 512
-TaskHandle_t SuperCapTask_Handler;
+//#define SUPERCAP_TASK_PRIO 25
+//#define SUPERCAP_STK_SIZE 512
+//TaskHandle_t SuperCapTask_Handler;
 
 void start_task(void *pvParameters)
 {
-    Judge_Data_Init();
 		taskENTER_CRITICAL();
 
     xTaskCreate((TaskFunction_t)UserTast,
@@ -118,19 +102,12 @@ void start_task(void *pvParameters)
 		(UBaseType_t)SHOOT_TASK_PRIO,
 		(TaskHandle_t *)&ShootTask_Handler);
 
-		xTaskCreate((TaskFunction_t)supercap_task,
-	  (const char *)"SuperCap_Task",
-	  (uint16_t)SUPERCAP_STK_SIZE,
+		xTaskCreate((TaskFunction_t)Judge_Task, // 裁判系统通信任务 
+		(const char *)"Judge_Task",
+		(uint16_t)JUDGE_STK_SIZE,
 		(void *)NULL,
-		(UBaseType_t)SUPERCAP_TASK_PRIO,
-		(TaskHandle_t *)&SuperCapTask_Handler);	
-
-//		xTaskCreate((TaskFunction_t)Judge_Task, // 裁判系统通信任务 
-//		(const char *)"Judge_Task",
-//		(uint16_t)JUDGE_STK_SIZE,
-//		(void *)NULL,
-//		(UBaseType_t)JUDGE_TASK_PRIO,
-//		(TaskHandle_t *)&JudgeTask_Handler);			
+		(UBaseType_t)JUDGE_TASK_PRIO,
+		(TaskHandle_t *)&JudgeTask_Handler);			
 				
     vTaskDelete(StartTask_Handler); //删除开始任务
     taskEXIT_CRITICAL();            //退出临界区

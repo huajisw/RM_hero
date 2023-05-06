@@ -4,7 +4,6 @@
 #include "main.h"
 #include "DJI_Remote_Control.h"
 #include "pid.h"
-#include "Judge_Data.h"
 #include "App_Set.h"
 #include "stm32f4xx.h"
 #include "stm32f4xx_it.h"
@@ -45,7 +44,8 @@
 
 #define Chassis_Follow_Gimbal_Set 6
 
-
+#define BUFFER_TOTAL_CURRENT_LIMIT_FACTOR 320
+#define POWER_TOTAL_CURRENT_LIMIT_FACTOR  500
 
 /*********电机数据*********/
 typedef struct
@@ -59,7 +59,8 @@ typedef struct
 /*********裁判系统读取数据*********/
 typedef struct
 {
-	Judge_Info_t* Chassis_Judge_Mes_Get;
+	Judge_Power_Heat_Data_t* Judge_Power_Heat_Data;
+	Judge_Game_Robot_Status_t* Judge_Game_Robot_Status;
 	//底盘功率数据
 	float Chassis_Power_Data_Get;
 	//底盘热量数据
@@ -69,31 +70,6 @@ typedef struct
 	//当前底盘最大热量
 	int Chassis_Max_Heat_Data_Get;
 }Chassos_Judge_Msg_t;
-
-/*********超级电容读取数据*********/
-typedef struct
-{
-	//超级电容相关数据读取
-	Super_C_Msg_t* Chassis_Cap_Msg_Get;
-//	//输入电压读取
-//	uint16_t Chassis_Voltage_In_Data_Get;
-//	//电容电压读取
-//	uint16_t Chassis_Cap_Data_Get;
-//	//输入电流读取
-//	uint16_t Chassis_Heat_Data_Get;
-//	//目标功率读取
-//	uint16_t Chassis_Cap_Power_Get;
-	//超级电容电压容量百分比
-	float Chassis_Cap_Power_Percent;
-	//目标功率设置
-	uint16_t Chassis_Cap_Power_Set;
-}Chassis_Cap_Msg_t;
-
-//union Chassis_Cap_Msg_t
-//{
-//	Chassos_Cap_Msg_Set_t Chassos_Cap_Msg_Set;
-//	
-//};
 
 
 typedef struct
@@ -106,10 +82,7 @@ typedef struct
 	
 	
 	//裁判系统相关数据获取
-	Chassos_Judge_Msg_t Chassos_Judge_Msg;
-	
-	//超级电容相关数据获取
-	Chassis_Cap_Msg_t Chassos_Cap_Msg;
+	Judge_Info_t* Chassis_Judge_Msg_Get;
 	
 	//底盘电机相关pid设置
 	PID Chassis_Motor_Pid[4];
@@ -133,6 +106,9 @@ typedef struct
 	//底盘电机速度设置
 	float Chassis_Motor_Speed_Set[4];
 	
+	float Chassis_Power;	//底盘功率数据
+	uint16_t Chassis_Power_Buffer;		//底盘热量数据
+	uint16_t Chassis_Max_Power;	//当前底盘最大功率
 	
 	//底盘发送电流值
 	float Chassis_Motor_Curent_Send[4];

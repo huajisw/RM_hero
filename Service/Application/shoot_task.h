@@ -5,219 +5,153 @@
 #include "DJI_Remote_Control.h"
 #include "pid.h"
 
-#include "Judge_Data.h"
-
 #include "stm32f4xx.h"
 #include "stm32f4xx_it.h"
 
-#define Firc_Motor_Kp 2600
-#define Firc_Motor_Max_Kp 12000
+#define FRIC_MOTOR_LEFT_KP 1200
+#define FRIC_MOTOR_LEFT_KI 0
+#define FRIC_MOTOR_LEFT_KD 1000
+#define FRIC_MOTOR_LEFT_MAXOUT 10000
+#define FRIC_MOTOR_LEFT_IMAXOUT 1000
 
-#define Firc_Motor_Left_Kp Firc_Motor_Kp
-#define Firc_Motor_Left_Ki 0
-#define Firc_Motor_Left_Kd 100
+#define FRIC_MOTOR_RIGHT_KP 1200
+#define FRIC_MOTOR_RIGHT_KI 0
+#define FRIC_MOTOR_RIGHT_KD 1000
+#define FRIC_MOTOR_RIGHT_MAXOUT 10000
+#define FRIC_MOTOR_RIGHT_IMAXOUT 1000
 
-#define Firc_Motor_Right_Kp Firc_Motor_Kp
-#define Firc_Motor_Right_Ki 0
-#define Firc_Motor_Right_Kd 100
-
-//下拨弹轮转速
-#define Firc_Up_Mode_Speed_Settt 4 //2
-
-#define Firc_Motor_Limit_Error 0.25f
-//#define Firc_Motor_Limit_Error 80.00f
-
-#define Firc_Motor_Up_Kp 4000
-#define Firc_Motor_Up_Ki 0
-#define Firc_Motor_Up_Kd 0
-
-#define Fric_Up_Speed_Change 0.0013888888
-
-
-#define Firc_Trigger_Motor_Kp 120//2800
-#define Firc_Trigger_Motor_Ki 2.4
-#define Firc_Trigger_Motor_Kd 0
+#define TRIGGER_MOTOR_KP 1200
+#define TRIGGER_MOTOR_KI 0
+#define TRIGGER_MOTOR_KD 0
+#define TRIGGER_MOTOR_MAXOUT 10000
+#define TRIGGER_MOTOR_IMAXOUT 5000
 
 //按键开启发射机构
-#define Shoot_Control_Start_KEY KEY_PRESSED_OFFSET_R
-//弹舱盖开关
-#define Shoot_Bullut_Open_KEY KEY_PRESSED_OFFSET_Z
+#define SHOOT_START_STOP_KEY KEY_PRESSED_OFFSET_R
+#define BULLET_BASKET_CLOSE_KEY KEY_PRESSED_OFFSET_C
+#define BULLET_BASKET_OPEN_KEY	KEY_PRESSED_OFFSET_V
 
-//红色镭射灯开关
-#define Shoot_Laser_On() Laser_on()
-#define Shoot_Laser_Off() Laser_off()
-
-
-//拨弹轮转速转换
-#define Trigger_Speed_Change Trigger_Speed_Hero
-
-//英雄云台拨弹轮转换
-#define Trigger_Speed_Hero 0.0043395526
-//1/60/3591*187*5/2
-
-
-//ZJX云台拨弹轮转换
-#define Trigger_Speed_ZJX 0.00277777777
-//1/60/36*10
-
-//CHH云台拨弹轮转换
-#define Trigger_Speed_CHH 0.0046296296
-//1/60/36*10
-
-
-#define Shoot_Motor_Speed_Sett 13
-
-#define Trigger_Turn_Speed_Set Trigger_Speed_Set_Test
+//拨弹轮拨一圈能拨出几发弹丸
+#define BULLETS_PER_ROTATION  8
+//摩擦轮直径
+#define FRIC_WHEEL_DIAMETER  0.06
+//默认射速
+#define SHOOT_MOTOR_SPEED_SET 12
 
 //拨弹速度设置
 #define Trigger_Speed_Set_Test 6
 #define Trigger_Speed_Set_Fast 2
 #define Trigger_Speed_Set_Slow 2
 
-#define Shoot_Once_Time_Limit 500
-
-//测试拨弹速度
-
-//判断堵转时间
-#define Trigger_Stop_Time_Set 500
-
-//反转时间
-#define Trigger_Back_Time_Set 1000
-
-//判断枪管无子弹时间
-#define Shoot_Step_Time 50
-
-
-//判断按键按下多久判断1发
-#define Shoot_Key_Time_Set 1000
-
 //微动开关宏定义
-#define Shoot_key_READ  Shoot_key_READ_ZJX
 
-#define Shoot_key_READ_ZJX  GPIO_ReadInputDataBit(GPIOF,GPIO_Pin_1)
-#define Shoot_key_READ_CHH  (GPIO_ReadInputDataBit(GPIOF,GPIO_Pin_0) | GPIO_ReadInputDataBit(GPIOF,GPIO_Pin_1))
+#define SHOOT_KEY_OFF 1
+#define SHOOT_KEY_ON 0
 
-#define Shoot_Key_Close 1
-#define Shoot_Key_Open 0
+//盖子开关设置
+#define BULLET_BASKET_OPEN_DUTY 	SERVO_MAX_DUTY
+#define BULLET_BASKET_CLOSE_DUTY 	SERVO_DEFAULT_DUTY
 
-#define Fric_Motor_Speed_Change 0.0031415926
+#define FRIC_MOTOR_LEFT_ID 0x201
+#define FRIC_MOTOR_RIGHT_ID 0x202
+#define TRIGGER_MOTOR_ID 0x207
+#define SHOOT_MOTOR_ALL_ID 0x200
+#define SHOOT_CAN CAN_1
 
-//拨弹轮速度设置
+#define SHOOT_BULLET_TIME_LIMIT 500
+#define SHOOT_MODE_SWITCH_DOWN_TIME_LIMIT 100
+#define SHOOT_STALL_TIME_LIMIT 1000
+#define TRIGGER_MOTOR_MIN_SPEED 1 
 
+#define LOAD_BULLET_SPEED 11
+#define UNLOAD_BULLET_SPEED -2
+#define TRIGGER_MOTOR_LOW_SPEED_TIME_LIMIT 1000
+
+#define DEFAULT_SHOOT_SPEED_LIMIT 10
+#define DEFAULT_SHOOT_FREQ_LIMIT  1
 
 typedef enum
 {
-	Shoot_Stop = 0,
-	Shoot_Ready1 = 1,//发射准备
-	Shoot_Ready = 2,
-	Shoot_Start = 3,//发射启动 (没有用)
-	Shoot_Done = 4,//单发结束
-	Shoot_Back = 5,//卡单
-	Shoot_Launch = 6,//发射完成
+	SHOOT_STOP,
+	SHOOT_START,
+	SHOOT_READY,
+	SHOOT_BULLET,
+	SHOOT_STALL
 }Shoot_Mode_t;
 
-
 typedef enum
 {
-	Shoot_None_Stop = 0,
-	Shoot_Motor_Ready = 1,
-	Shoot_Once = 2,
-	Shoot_Long = 3
-}Shoot_Num_Mode_t;
-
-typedef enum
-{
-	Shoot_Bullut_Close = 0,
-	Shoot_Bullut_Open = 1
-}Shoot_Bullut_Mode_t;
+	BASKET_OPEN,
+	BASKET_CLOSE,
+}Bullut_Basket_Mode_t;
 
 typedef struct
 {
-
-	float FIRC_Speed;
-	float FIRC_UP_Speed;
-	float Trigger_Speed_Set;
-	
-}Shoot_Firc_Control_t;
-
-
-typedef struct
-{
-	Motor_Msg_t* Shoot_Motor_Msg_Get;
-	uint16_t Motoe_Now_Angle;
-	int16_t Motoe_Now_Speed;
-	int16_t Motor_Now_Dianliu;
-	int16_t Motor_Last_Speed;
-	
-}Shoot_Motor_Msg_t;
-
-typedef struct
-{
-	Motor_Msg_t* Shoot_Motor_Msg_Get;
-	uint16_t Motoe_Now_Angle;
-	float Motoe_Now_Speed;
-	int16_t Motor_Now_Dianliu;
-	int16_t Motor_Last_Speed;	
-}Trigger_Motor_Msg_t;
-
-
-typedef struct
-{
-	float Shoot_Left_Speed_Get;
-	float Shoot_Right_Speed_Get;
-	
-}Shoot_State_Msg_t;
-
-/*********裁判系统读取数据*********/
-typedef struct
-{
-	Judge_Info_t* Shoot_Judge_Mes_Get;
-	//当前射速上线
-	float Shoot_Speed_Limit;
-	//当前热量冷却值
-	int Shoot_Cool_Now;
-	//当前热量上限
-	int Shoot_Heat_Limit;
-	//当前热量
-	int Shoot_Heat_Now;
-	//当前射速
-	float Shoot_Judge_Speed_Now;
-	//当前射频
-	int Shoot_Trigget_Speed_Now;
-	//当前热量百分比
-	float Shoot_Heat_Percent_Now;
-	//当前冷却值百分比
-	float Shoot_Cool_Percent_Now;
-}Shoot_Judge_Msg_t;
-
-
-
-typedef struct
-{
-	float Shoot_Motor_Pid_Out[3];
-	float Shoot_Trigger_Motor_Pid_Out;
-	Shoot_Bullut_Mode_t Shoot_Bullut_Mode;//弹舱盖开关
-	Shoot_Num_Mode_t Shoot_Num_Mode;//单发连发
 	Shoot_Mode_t Shoot_Mode;//发射模式
+	Shoot_Mode_t Last_Shoot_Mode;
+	
+	Motor_Msg_t* Fric_Motor_Msg_Get[2];
+	Motor_Msg_t* Trigger_Motor_Msg_Get;
+	Judge_Info_t* Shoot_Judge_Info_Get;
 	const RC_Ctl_t* Shoot_RC_Ctl_Data;	
-	Shoot_Motor_Msg_t Shoot_Motor_Msg[3];
-	Trigger_Motor_Msg_t Trigger_Motor_Msg;
-
-	Shoot_Judge_Msg_t Shoot_Judge_Msg;
 	
-	PID Shoot_Motor_Left_Pid;
-	PID Shoot_Motor_Right_Pid;
-	PID Shoot_Motor_Up_Pid;
-	PID Shoot_Trigger_Motor_Pid;
+	PID Fric_Motor_Pid[2];
+	PID Trigger_Motor_Pid;
 	
-	Shoot_State_Msg_t Shoot_State_Msg;
+	float Trigger_Motor_Speed_Set;//
+	float Fric_Motor_Speed_Set;		//
+	float Trigger_Motor_Speed_Get;//
+	float Fric_Motor_Speed_Get[2];//
+	float Fric_Motor_Current_Send[2];//
+	float Trigger_Motor_Current_Send;//
 	
-	Shoot_Firc_Control_t Shoot_Firc_Control;
+	uint8_t Fric_Reverse_Flag;    //摩擦轮电机反转
+	float Fric_Wheel_Diameter;		//摩擦轮直径
+	int8_t Trigger_Motor_Min_Speed;//拨弹电机最小转速
+	int8_t Load_Bullet_Speed;      //拨弹电机加载弹丸转速
+	int8_t Unload_Bullet_Speed;		 //拨弹电机退弹丸转速
+	uint8_t Bullets_Per_Rotation;  //拨盘上能装多少个弹丸
+	
+	uint8_t Default_Shoot_Freq_Limit;			//默认射频，如果没有裁判系统数据，使用该数据
+	uint16_t Default_Shoot_Speed_Limit;      //默认射速，如果没有裁判系统数据，使用该数据
+	//uint8_t Max_Shoot_Freq;										//机械上能够达到的最大射速
+	
+	uint16_t Trigger_Motor_Low_Speed_Time_Limit; //拨弹电机维持最低速度的最长时间，超过该时间认为电机堵转
+	uint16_t Shoot_Bullet_Time_Limit;						 //
+	uint16_t Shoot_Start_Time_Limit;
+	uint16_t Shoot_Stall_Time_Limit;
+	
+	uint16_t Shoot_Stall_Time;
+	uint16_t Shoot_Bullet_Time;
+	uint16_t Shoot_Start_Time;
+	uint16_t Shoot_Mode_Switch_Down_Time;
+	uint16_t Trigger_Motor_Low_Speed_Time;
+	uint16_t Need_Shoot_Count;
+	
+//	uint8_t No_Bullet_Flag;
+	
+	uint8_t Shoot_Key;
+	uint8_t Last_Shoot_Key;
+	uint8_t Last_Shoot_Mode_Switch;
+	uint16_t Last_Shoot_Mode_Key;
+	uint8_t Last_Shoot_Mouse_Key;
+	uint8_t Shoot_Key_On_Level;
+	
+	Bullut_Basket_Mode_t Bullet_Basket_Mode;
+	uint8_t Bullet_Basket_Reverse;
+	
+	uint16_t Judge_Shoot_Speed_Limit;//当前射速上线
+	uint8_t Judge_Robot_ID;
+	uint16_t Judge_Shoot_Cooling_Rate;//当前每秒热量冷却值
+	uint16_t Judge_Shoot_Cooling_Limit;//当前热量上限
+	uint16_t Judge_Shoot_Cooling_Heat; // 当前热量
+	float Judge_Shoot_Heat_Percent;
+	float Judge_Shoot_Cool_Percent;
 	
 }Shoot_t;
 
-
+float* Get_Trigger_Motor_Current_Data(void);
 void Shoot_Task(void *pvParameters);
 
 #endif
-
+void Create_Shoot_Task();

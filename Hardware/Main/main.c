@@ -16,10 +16,6 @@
 #include "flash.h"
 #include "power.h"
 
-
-#include "Judge_Data.h"
-
-#include "imu_bsp.h"
 #include "wit_c_sdk.h"
 
 #include "FreeRTOSConfig.h"
@@ -33,8 +29,6 @@
 
 #include "DJI_Remote_Control.h"
 
-extern uint32_t Flash_Data[2];
-uint32_t Flash_Data_Read[2];
 int main(void)
 { 
 	delay_init(configTICK_RATE_HZ);
@@ -46,9 +40,6 @@ int main(void)
 	Led_Init();
 	
 	remote_control_init();
-
-	
-//	PC_Usart_Init();
 	
 	Adc_Init();
 	Power_24V_Init();
@@ -56,11 +47,6 @@ int main(void)
 	UART7_Init();
 	
 	WT61_Init();
-//	WT61_UART8_Init();
-//  WitInit(WIT_PROTOCOL_NORMAL, 0x50);	
-//	WitSerialWriteRegister(SensorUartSend);
-//	WitRegisterCallBack(SensorDataUpdata);
-//	WitDelayMsRegister(Delayms);	
 
 	TIM1_Init();
 	TIM2_Init();
@@ -74,7 +60,6 @@ int main(void)
 	key_init();
 	Laser_Init();
 	Shoot_key_init();
-	Judge_Usart_Init();
 	__enable_irq();
 	
 	startTast();

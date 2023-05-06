@@ -3,6 +3,7 @@
 
 Motor_Msg_t ALL_Motor_Msg[20];
 Super_C_Msg_t Super_C_Msg;
+Judge_Info_t Judge_Info;
 
 /**
   * @brief  Configures the CAN.
@@ -186,6 +187,25 @@ void CAN1_SuperCap_Control(int16_t Stdid,uint16_t num1,uint16_t num2,uint16_t nu
     CAN_Transmit(CAN1,&tx_message);
 }
 
+void CAN1_Graphic_Data_Send(int16_t Stdid,uint8_t num1,uint8_t num2,uint8_t num3,uint8_t num4)
+{
+		CanTxMsg tx_message;
+    tx_message.RTR = CAN_RTR_DATA;  //Êý¾ÝÖ¡
+    tx_message.IDE = CAN_ID_STD;    //±ê×¼Ö¡
+    tx_message.DLC = 0x08;          //Ö¡³¤¶ÈÎª   
+	
+		tx_message.StdId = Stdid;
+		tx_message.Data[0] = num1;
+		tx_message.Data[1] = num2;
+		tx_message.Data[2] = num3;
+		tx_message.Data[3] = num4;
+		tx_message.Data[4] = 0;
+		tx_message.Data[5] = 0;
+		tx_message.Data[6] = 0;
+		tx_message.Data[7] = 0;
+    CAN_Transmit(CAN1,&tx_message);
+}
+
 /*************************************************************************
                           CAN1_RX0_IRQHandler
 ÃèÊö£ºCAN1µÄ½ÓÊÕÖÐ¶Ïº¯Êý
@@ -277,10 +297,20 @@ Super_C_Msg_t *Get_Cap_Data(void)
 	return &Super_C_Msg;
 }
 
+Judge_Info_t* Get_Judge_Info(void)
+{
+		return &Judge_Info;
+}
+
+uint8_t Is_Judge_Online(void)
+{
+		return xTaskGetTickCount() - Judge_Info.Timestamp < JUDGE_OFFLINE_TIME_LIMIT;
+}
+
 //´ÓCAN1×ÜÏßÉÏ½ÓÊÜ±àÂëÆ÷Êý¾Ý
 void Can1ReceiveMsgProcess(CanRxMsg *can_receive_message) 	//´«Èë½ÓÊÕµ½Êý¾ÝµÄÖ¸Õë
 {
-		float angle;
+		//float angle;
 //	CanRxMsg rx_message;
 	switch(can_receive_message->StdId)	//ÅÐ¶Ï±êÊ¶·û£¨¸ù¾Ýµçµ÷ËµÃ÷Êé£©
 	{
@@ -288,49 +318,41 @@ void Can1ReceiveMsgProcess(CanRxMsg *can_receive_message) 	//´«Èë½ÓÊÕµ½Êý¾ÝµÄÖ¸Õ
 					ALL_Motor_Msg[0].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úÐµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[0].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
 					ALL_Motor_Msg[0].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
-		      Angle_Count_Long(&ALL_Motor_Msg[0]);
 			break;
 		case 0x202:				
 					ALL_Motor_Msg[1].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úÐµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[1].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
 					ALL_Motor_Msg[1].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
-          Angle_Count_Long(&ALL_Motor_Msg[1]);		
 			break;	
 		case 0x203:				
 					ALL_Motor_Msg[2].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úÐµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[2].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[2].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
-          Angle_Count_Long(&ALL_Motor_Msg[2]);		
+					ALL_Motor_Msg[2].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
 			break;	
 		case 0x204:				
 					ALL_Motor_Msg[3].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úÐµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[3].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
-					ALL_Motor_Msg[3].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
-          Angle_Count_Long(&ALL_Motor_Msg[3]);		
+					ALL_Motor_Msg[3].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
 			break;	
 		case 0x205:	
 					ALL_Motor_Msg[4].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úÐµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[4].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
 					ALL_Motor_Msg[4].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
-          Angle_Count_Long(&ALL_Motor_Msg[4]);		
 			break;	
 		case 0x206:			
 					ALL_Motor_Msg[5].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úÐµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[5].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
 					ALL_Motor_Msg[5].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
-          Angle_Count_Long(&ALL_Motor_Msg[5]);		
 			break;	
 		case 0x207:				
 					ALL_Motor_Msg[6].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úÐµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[6].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
 					ALL_Motor_Msg[6].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
-          Angle_Count_Long(&ALL_Motor_Msg[6]);		
 			break;	
 		case 0x208:				
 					ALL_Motor_Msg[7].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úÐµ½Ç¶ÈÖµ 
 					ALL_Motor_Msg[7].speed=(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]);//µç»ú1µÄËÙ¶ÈÖµ
 					ALL_Motor_Msg[7].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);
-          Angle_Count_Long(&ALL_Motor_Msg[7]);		
 			break;
 		case 0x209:				
 					ALL_Motor_Msg[16].angle=(can_receive_message->Data[0] << 8) + (can_receive_message->Data[1]);//µç»ú1µÄ»úÐµ½Ç¶ÈÖµ 
@@ -347,7 +369,15 @@ void Can1ReceiveMsgProcess(CanRxMsg *can_receive_message) 	//´«Èë½ÓÊÕµ½Êý¾ÝµÄÖ¸Õ
 					Super_C_Msg.Cap_I=(int16_t)((uint16_t)(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]));//µçÈÝµçÑ¹
 					Super_C_Msg.Cap_State=(uint16_t)((can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]));//ÊäÈëµçÁ÷		
 					Super_C_Msg.Timestamp = xTaskGetTickCountFromISR();
-			break;
+		case 0x020:
+					memcpy(&Judge_Info.Judge_power_heat_data,&can_receive_message->Data,8);
+					Judge_Info.Timestamp = xTaskGetTickCountFromISR();
+					break;
+		case 0x021:
+					memcpy(&Judge_Info.Judge_game_robot_status,&can_receive_message->Data,8);
+					Judge_Info.Timestamp = xTaskGetTickCountFromISR();
+					break;
+				
 		}
 }
 
@@ -398,33 +428,5 @@ void Can2ReceiveMsgProcess(CanRxMsg *can_receive_message) 	//´«Èë½ÓÊÕµ½Êý¾ÝµÄÖ¸Õ
 					ALL_Motor_Msg[15].current=(can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]);	
 			break;	
 		}
-}
-
-
-//Created By Íõ¾¸
-#define ABS(x)		((x>0)? (x): (-x)) 
-void Angle_Count_Long(Motor_Msg_t *ms)
-{    
-    int res1, res2, delta;
-	if(ms->angle < ms->Last_Angle){					//angle > last//¿ÉÄÜµÄÇé¿ö
-		res1 = ms->angle + 8192 - ms->Last_Angle;	//Õý×ª£¬delta=+
-		res2 = ms->angle - ms->Last_Angle;			//·´×ª	delta=-
-	}
-	else if(ms->angle == ms->Last_Angle){					//angle > last//¿ÉÄÜµÄÇé¿ö
-		res1 = 0;	//Õý×ª£¬delta=+
-		res2 = 0;			//·´×ª	delta=-
-	}
-	else{	//angle < last
-		res1 = ms->angle - 8192 - ms->Last_Angle ;	//·´×ª	delta -
-		res2 = ms->angle - ms->Last_Angle;			//Õý×ª	delta +
-	}
-	//²»¹ÜÕý·´×ª£¬¿Ï¶¨ÊÇ×ªµÄ½Ç¶ÈÐ¡µÄÄÇ¸öÊÇÕæµÄ
-	if(ABS(res1)<=ABS(res2))
-		delta = res1;
-	else
-		delta = res2;
-
-	ms->Angle_Long += delta;//Êä³öÆ«ÒÆÁ¿-±ä»¯Á¿
-	ms->Last_Angle = ms->angle;//¸üÐÂ½Ç¶È    
 }
 

@@ -449,16 +449,6 @@
               <FilePath>..\Hardware\Initialize\PID.C</FilePath>
             </File>
             <File>
-              <FileName>oled.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Hardware\Initialize\oled.c</FilePath>
-            </File>
-            <File>
-              <FileName>oled_mode.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Hardware\Initialize\oled_mode.c</FilePath>
-            </File>
-            <File>
               <FileName>spi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Hardware\Initialize\spi.c</FilePath>
@@ -582,6 +572,57 @@
               <FileName>chassis_power_control.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Hardware\Initialize\chassis_power_control.c</FilePath>
+              <FileOption>
+                <CommonProperty>
+                  <UseCPPCompiler>2</UseCPPCompiler>
+                  <RVCTCodeConst>0</RVCTCodeConst>
+                  <RVCTZI>0</RVCTZI>
+                  <RVCTOtherData>0</RVCTOtherData>
+                  <ModuleSelection>0</ModuleSelection>
+                  <IncludeInBuild>0</IncludeInBuild>
+                  <AlwaysBuild>2</AlwaysBuild>
+                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
+                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
+                  <PublicsOnly>2</PublicsOnly>
+                  <StopOnExitCode>11</StopOnExitCode>
+                  <CustomArgument></CustomArgument>
+                  <IncludeLibraryModules></IncludeLibraryModules>
+                  <ComprImg>1</ComprImg>
+                </CommonProperty>
+                <FileArmAds>
+                  <Cads>
+                    <interw>2</interw>
+                    <Optim>0</Optim>
+                    <oTime>2</oTime>
+                    <SplitLS>2</SplitLS>
+                    <OneElfS>2</OneElfS>
+                    <Strict>2</Strict>
+                    <EnumInt>2</EnumInt>
+                    <PlainCh>2</PlainCh>
+                    <Ropi>2</Ropi>
+                    <Rwpi>2</Rwpi>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
+                    <uSurpInc>2</uSurpInc>
+                    <uC99>2</uC99>
+                    <uGnu>2</uGnu>
+                    <useXO>2</useXO>
+                    <v6Lang>0</v6Lang>
+                    <v6LangP>0</v6LangP>
+                    <vShortEn>2</vShortEn>
+                    <vShortWch>2</vShortWch>
+                    <v6Lto>2</v6Lto>
+                    <v6WtE>2</v6WtE>
+                    <v6Rtti>2</v6Rtti>
+                    <VariousControls>
+                      <MiscControls></MiscControls>
+                      <Define></Define>
+                      <Undefine></Undefine>
+                      <IncludePath></IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
             </File>
           </Files>
         </Group>
@@ -929,128 +970,6 @@
               <FilePath>..\Service\Application\user_task.c</FilePath>
             </File>
             <File>
-              <FileName>oled_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Service\Application\oled_task.c</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Cads>
-                    <interw>2</interw>
-                    <Optim>0</Optim>
-                    <oTime>2</oTime>
-                    <SplitLS>2</SplitLS>
-                    <OneElfS>2</OneElfS>
-                    <Strict>2</Strict>
-                    <EnumInt>2</EnumInt>
-                    <PlainCh>2</PlainCh>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <wLevel>0</wLevel>
-                    <uThumb>2</uThumb>
-                    <uSurpInc>2</uSurpInc>
-                    <uC99>2</uC99>
-                    <uGnu>2</uGnu>
-                    <useXO>2</useXO>
-                    <v6Lang>0</v6Lang>
-                    <v6LangP>0</v6LangP>
-                    <vShortEn>2</vShortEn>
-                    <vShortWch>2</vShortWch>
-                    <v6Lto>2</v6Lto>
-                    <v6WtE>2</v6WtE>
-                    <v6Rtti>2</v6Rtti>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Cads>
-                </FileArmAds>
-              </FileOption>
-            </File>
-            <File>
-              <FileName>oled_task.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Service\Application\oled_task.h</FilePath>
-            </File>
-            <File>
-              <FileName>judge_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Service\Application\judge_task.c</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Cads>
-                    <interw>2</interw>
-                    <Optim>0</Optim>
-                    <oTime>2</oTime>
-                    <SplitLS>2</SplitLS>
-                    <OneElfS>2</OneElfS>
-                    <Strict>2</Strict>
-                    <EnumInt>2</EnumInt>
-                    <PlainCh>2</PlainCh>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <wLevel>0</wLevel>
-                    <uThumb>2</uThumb>
-                    <uSurpInc>2</uSurpInc>
-                    <uC99>2</uC99>
-                    <uGnu>2</uGnu>
-                    <useXO>2</useXO>
-                    <v6Lang>0</v6Lang>
-                    <v6LangP>0</v6LangP>
-                    <vShortEn>2</vShortEn>
-                    <vShortWch>2</vShortWch>
-                    <v6Lto>2</v6Lto>
-                    <v6WtE>2</v6WtE>
-                    <v6Rtti>2</v6Rtti>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Cads>
-                </FileArmAds>
-              </FileOption>
-            </File>
-            <File>
-              <FileName>judge_task.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Service\Application\judge_task.h</FilePath>
-            </File>
-            <File>
               <FileName>IMU_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Service\Application\IMU_task.c</FilePath>
@@ -1079,16 +998,6 @@
               <FileName>DJI_Remote_Control.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Service\Application\DJI_Remote_Control.h</FilePath>
-            </File>
-            <File>
-              <FileName>oled_list.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Service\Application\oled_list.c</FilePath>
-            </File>
-            <File>
-              <FileName>oled_list.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Service\Application\oled_list.h</FilePath>
             </File>
             <File>
               <FileName>gimbal_task.c</FileName>
@@ -1126,14 +1035,14 @@
               <FilePath>..\Service\Application\REG.h</FilePath>
             </File>
             <File>
-              <FileName>supercap_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Service\Application\supercap_task.c</FilePath>
-            </File>
-            <File>
               <FileName>freertos_usr_lib.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Service\Application\freertos_usr_lib.c</FilePath>
+            </File>
+            <File>
+              <FileName>judge_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Service\Application\judge_task.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1141,39 +1050,9 @@
           <GroupName>help</GroupName>
           <Files>
             <File>
-              <FileName>usb_task.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Service\Application\usb_task.h</FilePath>
-            </File>
-            <File>
               <FileName>help.txt</FileName>
               <FileType>5</FileType>
               <FilePath>..\User\help.txt</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>DJI_Judge</GroupName>
-          <Files>
-            <File>
-              <FileName>Judge_Data.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Service\DJI_Judge\Judge_Data.c</FilePath>
-            </File>
-            <File>
-              <FileName>Judge_Data.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Service\DJI_Judge\Judge_Data.h</FilePath>
-            </File>
-            <File>
-              <FileName>Judge_CRC.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Service\DJI_Judge\Judge_CRC.c</FilePath>
-            </File>
-            <File>
-              <FileName>Judge_CRC.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Service\DJI_Judge\Judge_CRC.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -1241,9 +1120,6 @@
               <FilePath>..\Hardware\Serial\USB_Library\Class\cdc\src\usbd_cdc_if_template.c</FilePath>
             </File>
           </Files>
-        </Group>
-        <Group>
-          <GroupName>New Group</GroupName>
         </Group>
       </Groups>
     </Target>

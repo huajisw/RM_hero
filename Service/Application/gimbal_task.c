@@ -14,6 +14,7 @@
 */
 
 #include "gimbal_task.h"
+#include "shoot_task.h"
 #include "IMU_Task.h"
 
 #include "arm_math.h"
@@ -68,7 +69,7 @@ float Gimbal_Motor_Yaw_Set_Add;
 float Gimbal_Motor_Pitch_Set_Add;
 
 //中点设置
-#define Gimbal_Yaw_Middle_Angle  -1.12f
+#define Gimbal_Yaw_Middle_Angle  -1.85f
 #define Gimbal_Pitch_Middle_Angle  -1.60f
 
 #define Yaw_Max_Angle 1.9f
@@ -481,6 +482,8 @@ void Gimbal_Init(Gimbal_t* Gimbal_Init)
 	//电机电流值清零
  	Gimbal_Init->Gimbal_Motor_Current_Send[0] = 0;
 	Gimbal_Init->Gimbal_Motor_Current_Send[1] = 0;
+	//
+	Gimbal_Init->Trigger_Motor_Current_Send = Get_Trigger_Motor_Current_Data();
 }
 
 void Gimbal_Data_Update(Gimbal_Msg_t* Gimbal_Msg_Update)
@@ -510,25 +513,6 @@ void Gimbal_3508_Motor_Data_Update(Gimbal_Msg_t_Pitch* Gimbal_Pitch_Motor_Msg_Up
 	Gimbal_Pitch_Motor_Msg_Update->Gimbal_Pitch_Speed_Get = ((float)(Gimbal_Pitch_Motor_Msg_Update->Gimbal_Motor_Msg_Get->speed)*0.0012708333f);///60*2*3.1415926 *152.5/2/1000
 	//IMU Pitch轴的数据
 	Gimbal_Pitch_Motor_Msg_Update->Gimbal_IMU_Angle_Msg = (*(Gimbal_Pitch_Motor_Msg_Update->Gimbal_IMU_Angle_Data))/180*PI;
-  //转速累计     	
-	Gimbal_Pitch_Motor_Msg_Update->Motor_Run_Long += Gimbal_Pitch_Motor_Msg_Update->Gimbal_Motor_Msg_Get->speed;
-	//利用电机速度     经过转化变成距离  抬头距离是+  低头距离是-
-	Gimbal_Pitch_Motor_Msg_Update->Motor_Run_Dis_Get_turn_by_speed = -(float)(Gimbal_Pitch_Motor_Msg_Update->Motor_Run_Long / 1000 / 60 / 3591 * 187 * 10);	
-	//利用电机机械角度 经过转化变成距离  抬头距离是+  低头距离是-
-	Gimbal_Pitch_Motor_Msg_Update->Motor_Run_Dis_Get_turn_by_angle = -(float)((float)Gimbal_Pitch_Motor_Msg_Update->Gimbal_Motor_Msg_Get->Angle_Long / 8192 / 3591 * 187 * 14);
-	
-	
-	//废案  无法解决问题
-	//外置陀螺仪的Pitch轴的数据
-	Gimbal_Pitch_Motor_Msg_Update->Gimbal_Control_Pitch_IMU = fAngle[2];	
-	if( Gimbal_Pitch_Motor_Msg_Update->Gimbal_Control_Pitch_IMU != 0 && Gimbal_Pitch_Motor_Msg_Update->Angle_Init_flag == 0 )
-	{	 
-      Gimbal_Pitch_Motor_Msg_Update->Gimbal_Middle_Angle = Gimbal_Pitch_Motor_Msg_Update->Gimbal_Control_Pitch_IMU;
-	    Gimbal_Pitch_Motor_Msg_Update->Gimbal_Max_Angle = Gimbal_Pitch_Motor_Msg_Update->Gimbal_Middle_Angle	+ Pitch_Deviation_Max;	
-	    Gimbal_Pitch_Motor_Msg_Update->Gimbal_Min_Angle = Gimbal_Pitch_Motor_Msg_Update->Gimbal_Middle_Angle	- Pitch_Deviation_Max;	
-		  Gimbal_Pitch_Motor_Msg_Update->Angle_Init_flag = 1;
-	}
-		
 }
 
 extern int Check_Motionless_Flag;
@@ -619,8 +603,6 @@ void Gimbal_Mode_Change(Gimbal_t* Mode_Change)
 }
 
 
-
-float Angle_tttt;
 void Gimbal_IMU_Control_Data_Check(Gimbal_t* Gimbal_Data_Check)
 {
 	float Old_Data,Change_Data,Add,Out_Data;
@@ -1244,12 +1226,7 @@ int Motor_Move_Check(Motor_Msg_t* Motor_Msg_Check)
 	led_red_off();
 	return 1;
 }	
-int No_Move_Flag;
-int Check,Check_Count;
 
-int Test_Angle[2];
-
-extern int Trigger_Speed_Send;
 void Gimbal_Task(void *pvParameters)
 {
 	vTaskDelay(250);
@@ -1268,11 +1245,8 @@ void Gimbal_Task(void *pvParameters)
 		
 		Gimbal_Mode_Config(&Gimbal);
 				
-//		CAN1_Motor_Control(0x1FF,(int16_t)Gimbal.Gimbal_Motor_Current_Send[0],(int16_t)Gimbal.Gimbal_Motor_Current_Send[1],(int16_t)Trigger_Speed_Send,0);
-//		   CAN1_Motor_Control(0x1FF,0,(int16_t)Gimbal.Gimbal_Motor_Current_Send[1],(int16_t)0,0);		
-     CAN1_Motor_Control(0x1FF,(int16_t)Gimbal.Gimbal_Motor_Current_Send[0],(int16_t)Gimbal.Gimbal_Motor_Current_Send[1],(int16_t)Trigger_Speed_Send,0);		
-		//CAN1_Motor_Control(0x1FF,(int16_t)Gimbal.Gimbal_Motor_Current_Send[0],0,(int16_t)Trigger_Speed_Send,0);		
-		//CAN2_Motor_Control(0x1FF,0,0,(int16_t)Trigger_Speed_Send,0);			
+    CAN1_Motor_Control(0x1FF,(int16_t)Gimbal.Gimbal_Motor_Current_Send[0],(int16_t)Gimbal.Gimbal_Motor_Current_Send[1],(int16_t)(*Gimbal.Trigger_Motor_Current_Send),0);			
+		
 		vTaskDelay(1);	
 	}
 }

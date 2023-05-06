@@ -14,7 +14,6 @@
 */
 #include "chassis_task.h"
 #include "gimbal_task.h"
-#include "chassis_power_control.h"
 
 #include "math.h"
 #include "arm_math.h"
@@ -71,11 +70,11 @@ void Chassis_Init(Chassis_t* Chassis_Data_Init)
 	Chassis_Data_Init->Chassis_Mode = Chassis_Zero;
 	
 	//底盘电机PID初始化
-	pid_init(&Chassis_Data_Init->Chassis_Motor_Pid[0],Chassis_Motor_Speed_Kp,Chassis_Motor_Speed_Ki,Chassis_Motor_Speed_Kd,Chassis_Motor_Speed_Maxout,Chassis_Motor_Speed_Kp,2);
-	pid_init(&Chassis_Data_Init->Chassis_Motor_Pid[1],Chassis_Motor_Speed_Kp,Chassis_Motor_Speed_Ki,Chassis_Motor_Speed_Kd,Chassis_Motor_Speed_Maxout,Chassis_Motor_Speed_Kp,2);
-	pid_init(&Chassis_Data_Init->Chassis_Motor_Pid[2],Chassis_Motor_Speed_Kp,Chassis_Motor_Speed_Ki,Chassis_Motor_Speed_Kd,Chassis_Motor_Speed_Maxout,Chassis_Motor_Speed_Kp,2);
-	pid_init(&Chassis_Data_Init->Chassis_Motor_Pid[3],Chassis_Motor_Speed_Kp,Chassis_Motor_Speed_Ki,Chassis_Motor_Speed_Kd,Chassis_Motor_Speed_Maxout,Chassis_Motor_Speed_Kp,2);
-	pid_init(&Chassis_Data_Init->Chassis_Motor_Turn_Pid,Chassis_Motor_Turn_Kp,Chassis_Motor_Turn_Ki,Chassis_Motor_Turn_Kd,Chassis_Motor_Turn_Maxout,Chassis_Motor_Turn_Kp,2);
+	pid_init(&Chassis_Data_Init->Chassis_Motor_Pid[0],Chassis_Motor_Speed_Kp,Chassis_Motor_Speed_Ki,Chassis_Motor_Speed_Kd,Chassis_Motor_Speed_Maxout,Chassis_Motor_Speed_IMaxout,2);
+	pid_init(&Chassis_Data_Init->Chassis_Motor_Pid[1],Chassis_Motor_Speed_Kp,Chassis_Motor_Speed_Ki,Chassis_Motor_Speed_Kd,Chassis_Motor_Speed_Maxout,Chassis_Motor_Speed_IMaxout,2);
+	pid_init(&Chassis_Data_Init->Chassis_Motor_Pid[2],Chassis_Motor_Speed_Kp,Chassis_Motor_Speed_Ki,Chassis_Motor_Speed_Kd,Chassis_Motor_Speed_Maxout,Chassis_Motor_Speed_IMaxout,2);
+	pid_init(&Chassis_Data_Init->Chassis_Motor_Pid[3],Chassis_Motor_Speed_Kp,Chassis_Motor_Speed_Ki,Chassis_Motor_Speed_Kd,Chassis_Motor_Speed_Maxout,Chassis_Motor_Speed_IMaxout,2);
+	pid_init(&Chassis_Data_Init->Chassis_Motor_Turn_Pid,Chassis_Motor_Turn_Kp,Chassis_Motor_Turn_Ki,Chassis_Motor_Turn_Kd,Chassis_Motor_Turn_Maxout,Chassis_Motor_Turn_IMaxout,2);
 	
 	//获取底盘电机数据地址
 	Chassis_Data_Init->Chassis_Motor_Msg[0].Chassis_Motor_Msg_Get = Get_DJI_Motor_Data(CAN1_RX,Chassis_Motor_RI);
@@ -84,10 +83,8 @@ void Chassis_Init(Chassis_t* Chassis_Data_Init)
 	Chassis_Data_Init->Chassis_Motor_Msg[3].Chassis_Motor_Msg_Get = Get_DJI_Motor_Data(CAN1_RX,Chassis_Motor_RB);
 		
 	//裁判系统数据获取
-	Chassis_Data_Init->Chassos_Judge_Msg.Chassis_Judge_Mes_Get = Get_Judge_Info();
-	Chassis_Data_Init->Chassos_Judge_Msg.Chassis_Power_Data_Get = (float)Chassis_Data_Init->Chassos_Judge_Msg.Chassis_Judge_Mes_Get->Judge_power_heat_data.chassis_power;
-	Chassis_Data_Init->Chassos_Judge_Msg.Chassis_Heat_Data_Get = (int)Chassis_Data_Init->Chassos_Judge_Msg.Chassis_Judge_Mes_Get->Judge_power_heat_data.chassis_power_buffer;
-	Chassis_Data_Init->Chassos_Judge_Msg.Chassis_Max_Power_Data_Get = (int)Chassis_Data_Init->Chassos_Judge_Msg.Chassis_Judge_Mes_Get->Judge_game_robot_status.chassis_power_limit;
+	//裁判系统数据获取
+	Chassis_Data_Init->Chassis_Judge_Msg_Get = Get_Judge_Info();
 		
 	//底盘控制数据清零
 	for(int i = 0;i < 4;i++)
@@ -123,9 +120,9 @@ void Chassis_Motor_Data_Update(Chassos_Motor_Msg_t* Chassos_Motor_Msg_Update)
 /*****裁判系统数据更新函数*****/
 void Chassis_Judge_Data_Update(Chassos_Judge_Msg_t* Chassos_Judge_Msg_Update)
 {
-	Chassos_Judge_Msg_Update->Chassis_Power_Data_Get = (float)Chassos_Judge_Msg_Update->Chassis_Judge_Mes_Get->Judge_power_heat_data.chassis_power;
-	Chassos_Judge_Msg_Update->Chassis_Heat_Data_Get = (int)Chassos_Judge_Msg_Update->Chassis_Judge_Mes_Get->Judge_power_heat_data.chassis_power_buffer;
-	Chassos_Judge_Msg_Update->Chassis_Max_Power_Data_Get = (int)Chassos_Judge_Msg_Update->Chassis_Judge_Mes_Get->Judge_game_robot_status.chassis_power_limit;
+	Chassos_Judge_Msg_Update->Chassis_Power_Data_Get = (float)Chassos_Judge_Msg_Update->Judge_Power_Heat_Data->chassis_power;
+	Chassos_Judge_Msg_Update->Chassis_Heat_Data_Get = (int)Chassos_Judge_Msg_Update->Judge_Power_Heat_Data->chassis_power_buffer;
+	Chassos_Judge_Msg_Update->Chassis_Max_Power_Data_Get = (int)Chassos_Judge_Msg_Update->Judge_Game_Robot_Status->chassis_power_limit;
 	
 	if(Chassos_Judge_Msg_Update->Chassis_Heat_Data_Get > 60)
 	{
@@ -513,8 +510,6 @@ void Chassis_Mode_Set(Chassis_t* Chassis_Mode)
 {
 	static int Chassis_Last_RC_Key_Mode,Chassis_Last_RC_SW;
 	static int Mode_Count = 0;
-
-	
 	
 			if(Chassis_Mode->Chassis_RC_Ctl_Data->rc.s2 == RC_SW_DOWN)   
 				Chassis_Mode->Chassis_Mode = Chassis_First_Mode;
@@ -587,6 +582,110 @@ void Chassis_Data_Update(Chassis_t* Chassis_Update)
 	for(int i = 0;i < 4;i++)
 	Chassis_Motor_Data_Update(&Chassis_Update->Chassis_Motor_Msg[i]);
 	
+	Chassis_Update->Chassis_Power = Chassis_Update->Chassis_Judge_Msg_Get->Judge_power_heat_data.chassis_power;
+	Chassis_Update->Chassis_Power_Buffer = Chassis_Update->Chassis_Judge_Msg_Get->Judge_power_heat_data.chassis_power_buffer;
+	Chassis_Update->Chassis_Max_Power = Chassis_Update->Chassis_Judge_Msg_Get->Judge_game_robot_status.chassis_power_limit;
+}
+
+
+void Chassis_Power_Limit(Chassis_t* Power_Limit)
+{
+		//裁判系统没有上线，不用限制功率
+		//if(Is_Judge_Online()&&Power_Limit->Robot_ID!=Blue_Engineer&&Power_Limit->Robot_ID!=Red_Engineer&&!is_supercap_alive())
+		if(Is_Judge_Online())
+		{
+			//如果超级电容离线，那么只能强制限制功率	
+			float Total_Current_Limit = 0.0f;
+			float Total_Current = 0.0f;
+			
+			//缓冲能量平时是60J，触发飞坡增益是200J，根据实际情况限定缓冲能量警告值
+			uint16_t Warning_Power_Buffer;
+			if(Power_Limit->Chassis_Power_Buffer < 60)
+			{
+					Warning_Power_Buffer = 50;
+			}
+			else
+			{
+					Warning_Power_Buffer = 190;
+			}
+			
+			//功率警告值为最大功率的一半
+			float Warning_Power = (float)Power_Limit->Chassis_Max_Power/2;
+			
+			//float Power_Total_Current_Limit = Power_Limit->Chassis_Max_Power/
+			
+       //缓冲能量小于警告值
+			if(Power_Limit->Chassis_Power_Buffer < Warning_Power_Buffer)
+			{
+					float Power_Scale;
+					if(Power_Limit->Chassis_Power_Buffer  > 5.0f)
+					{
+							//scale down WARNING_POWER_BUFF
+							//缩小WARNING_POWER_BUFF
+							Power_Scale = (float)Power_Limit->Chassis_Power_Buffer;
+					}
+					else
+					{
+							//only left 10% of WARNING_POWER_BUFF
+							Power_Scale = 5.0f ;
+					}
+					//scale down
+					//缩小
+					Total_Current_Limit = BUFFER_TOTAL_CURRENT_LIMIT_FACTOR * Power_Scale;
+			}
+			else
+			{
+					//power > WARNING_POWER
+					//功率大于WARNING_POWER
+					if(Power_Limit->Chassis_Power > Warning_Power)
+					{
+							float Power_Scale;
+							//power < 80w
+							//功率小于80w
+							if(Power_Limit->Chassis_Power < Power_Limit->Chassis_Max_Power)
+							{
+									//scale down
+									//缩小
+									Power_Scale = Power_Limit->Chassis_Max_Power - Power_Limit->Chassis_Power;
+									
+							}
+							//power > 80w
+							//功率大于80w
+							else
+							{
+									Power_Scale = 0.0f;
+							}
+							
+							Total_Current_Limit = BUFFER_TOTAL_CURRENT_LIMIT_FACTOR * Warning_Power_Buffer 
+																	+ POWER_TOTAL_CURRENT_LIMIT_FACTOR * Power_Scale;
+					}
+					//power < WARNING_POWER
+					//功率小于WARNING_POWER
+					else
+					{
+							Total_Current_Limit = BUFFER_TOTAL_CURRENT_LIMIT_FACTOR * Warning_Power_Buffer
+																	+ POWER_TOTAL_CURRENT_LIMIT_FACTOR * Warning_Power;
+					}
+			}
+			
+			Total_Current = 0.0f;
+			//calculate the original motor current set
+			//计算原本电机电流设定
+			for(uint8_t i = 0; i < 4; i++)
+			{
+					Total_Current += fabs(Power_Limit->Chassis_Motor_Curent_Send[i]);
+			}
+			
+
+			if(Total_Current > Total_Current_Limit)
+			{
+					float Current_Scale = Total_Current_Limit / Total_Current;
+					Power_Limit->Chassis_Motor_Curent_Send[0]*=Current_Scale;
+					Power_Limit->Chassis_Motor_Curent_Send[1]*=Current_Scale;
+					Power_Limit->Chassis_Motor_Curent_Send[2]*=Current_Scale;
+					Power_Limit->Chassis_Motor_Curent_Send[3]*=Current_Scale;
+			}
+    }
 }
 
 void Chassis_Task(void *pvParameters)
@@ -606,7 +705,7 @@ void Chassis_Task(void *pvParameters)
 		Chassis_Control_Data_Get(&Chassis);
 		Chassis_PID_Calculate_Data(&Chassis);
 		
-		chassis_power_control(&Chassis);
+		Chassis_Power_Limit(&Chassis);
 		
 		CAN1_Motor_Control(0x200,(int16_t)Chassis.Chassis_Motor_Curent_Send[0],(int16_t)Chassis.Chassis_Motor_Curent_Send[1],(int16_t)Chassis.Chassis_Motor_Curent_Send[2],(int16_t)Chassis.Chassis_Motor_Curent_Send[3]);
 

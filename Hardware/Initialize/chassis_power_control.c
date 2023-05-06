@@ -36,9 +36,9 @@ void chassis_power_control(Chassis_t *chassis_power_control)
     //uint8_t robot_id = get_robot_id();
 	  
 	
-	  chassis_power = chassis_power_control->Chassos_Judge_Msg.Chassis_Judge_Mes_Get->Judge_power_heat_data.chassis_power;
-	  chassis_power_buffer = chassis_power_control->Chassos_Judge_Msg.Chassis_Judge_Mes_Get->Judge_power_heat_data.chassis_power_buffer;
-	  Power_Limit = chassis_power_control->Chassos_Judge_Msg.Chassis_Judge_Mes_Get->Judge_game_robot_status.chassis_power_limit;
+	  chassis_power = chassis_power_control->Chassos_Judge_Msg.Chassis_Power_Data_Get;
+	  chassis_power_buffer = chassis_power_control->Chassos_Judge_Msg.Chassis_Max_Heat_Data_Get;
+	  Power_Limit = chassis_power_control->Chassos_Judge_Msg.Chassis_Max_Power_Data_Get;
 	  No_Judeg_Total_Current_Limit = 64000.0f;
 	  Buffer_Total_Current_Limit = 16000.0f;
 	  Waring_Power = Power_Limit/2 ;
