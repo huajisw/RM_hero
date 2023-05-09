@@ -20,11 +20,17 @@
 #define FRIC_MOTOR_RIGHT_MAXOUT 10000
 #define FRIC_MOTOR_RIGHT_IMAXOUT 1000
 
-#define TRIGGER_MOTOR_KP 1200
-#define TRIGGER_MOTOR_KI 0
-#define TRIGGER_MOTOR_KD 0
-#define TRIGGER_MOTOR_MAXOUT 10000
-#define TRIGGER_MOTOR_IMAXOUT 5000
+#define TRIGGER_MOTOR_SPEED_KP 2800
+#define TRIGGER_MOTOR_SPEED_KI 2
+#define TRIGGER_MOTOR_SPEED_KD 0
+#define TRIGGER_MOTOR_SPEED_MAXOUT 10000
+#define TRIGGER_MOTOR_SPEED_IMAXOUT 5000
+
+#define TRIGGER_MOTOR_ANGLE_KP 6
+#define TRIGGER_MOTOR_ANGLE_KI 0
+#define TRIGGER_MOTOR_ANGLE_KD 10
+#define TRIGGER_MOTOR_ANGLE_MAXOUT 10
+#define TRIGGER_MOTOR_ANGLE_IMAXOUT 0
 
 //按键开启发射机构
 #define SHOOT_START_STOP_KEY KEY_PRESSED_OFFSET_R
@@ -32,7 +38,7 @@
 #define BULLET_BASKET_OPEN_KEY	KEY_PRESSED_OFFSET_V
 
 //拨弹轮拨一圈能拨出几发弹丸
-#define BULLETS_PER_ROTATION  8
+#define BULLETS_PER_ROTATION  6
 //摩擦轮直径
 #define FRIC_WHEEL_DIAMETER  0.06
 //默认射速
@@ -58,17 +64,18 @@
 #define SHOOT_MOTOR_ALL_ID 0x200
 #define SHOOT_CAN CAN_1
 
-#define SHOOT_BULLET_TIME_LIMIT 500
+#define SHOOT_BULLET_TIME_LIMIT 2000
 #define SHOOT_MODE_SWITCH_DOWN_TIME_LIMIT 100
+#define SHOOT_MOUSE_KEY_PRESSED_TIME_LIMIT	500
 #define SHOOT_STALL_TIME_LIMIT 1000
 #define TRIGGER_MOTOR_MIN_SPEED 1 
 
-#define LOAD_BULLET_SPEED 11
+#define LOAD_BULLET_SPEED 1
 #define UNLOAD_BULLET_SPEED -2
 #define TRIGGER_MOTOR_LOW_SPEED_TIME_LIMIT 1000
 
 #define DEFAULT_SHOOT_SPEED_LIMIT 10
-#define DEFAULT_SHOOT_FREQ_LIMIT  1
+#define DEFAULT_SHOOT_FREQ_LIMIT  2
 
 typedef enum
 {
@@ -96,14 +103,19 @@ typedef struct
 	const RC_Ctl_t* Shoot_RC_Ctl_Data;	
 	
 	PID Fric_Motor_Pid[2];
-	PID Trigger_Motor_Pid;
+	PID Trigger_Motor_Speed_Pid;
+	PID Trigger_Motor_Angle_Pid;
 	
 	float Trigger_Motor_Speed_Set;//
+	float Trigger_Motor_Angle_Get;
+	float Trigger_Motor_Angle_Set;
 	float Fric_Motor_Speed_Set;		//
 	float Trigger_Motor_Speed_Get;//
 	float Fric_Motor_Speed_Get[2];//
 	float Fric_Motor_Current_Send[2];//
 	float Trigger_Motor_Current_Send;//
+	
+	uint32_t Trigger_Angle_Timestamp;
 	
 	uint8_t Fric_Reverse_Flag;    //摩擦轮电机反转
 	float Fric_Wheel_Diameter;		//摩擦轮直径
@@ -125,6 +137,7 @@ typedef struct
 	uint16_t Shoot_Bullet_Time;
 	uint16_t Shoot_Start_Time;
 	uint16_t Shoot_Mode_Switch_Down_Time;
+	uint16_t Shoot_Mouse_Key_Pressed_Time;
 	uint16_t Trigger_Motor_Low_Speed_Time;
 	uint16_t Need_Shoot_Count;
 	

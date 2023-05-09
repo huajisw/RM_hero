@@ -369,6 +369,7 @@ void Can1ReceiveMsgProcess(CanRxMsg *can_receive_message) 	//´«Èë½ÓÊÕµ½Êý¾ÝµÄÖ¸Õ
 					Super_C_Msg.Cap_I=(int16_t)((uint16_t)(can_receive_message->Data[2] << 8) + (can_receive_message->Data[3]));//µçÈÝµçÑ¹
 					Super_C_Msg.Cap_State=(uint16_t)((can_receive_message->Data[4] << 8) + (can_receive_message->Data[5]));//ÊäÈëµçÁ÷		
 					Super_C_Msg.Timestamp = xTaskGetTickCountFromISR();
+					break;
 		case 0x020:
 					memcpy(&Judge_Info.Judge_power_heat_data,&can_receive_message->Data,8);
 					Judge_Info.Timestamp = xTaskGetTickCountFromISR();
