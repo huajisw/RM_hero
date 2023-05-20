@@ -123,14 +123,14 @@ static void Angle_Control_Limit(float *Angle_Set,float Max_Angle,float Min_Angle
 #define Gimbal_Yaw_Motor_Angle_Maxout 10
 #define Gimbal_Yaw_Motor_Angle_IMaxout 10
 
-#define Gimbal_Yaw_IMU_Angle_Kp 8
+#define Gimbal_Yaw_IMU_Angle_Kp 5
 #define Gimbal_Yaw_IMU_Angle_Ki 0
-#define Gimbal_Yaw_IMU_Angle_Kd 1200
+#define Gimbal_Yaw_IMU_Angle_Kd 1500
 #define Gimbal_Yaw_IMU_Angle_Maxout 9
 #define Gimbal_Yaw_IMU_Angle_IMaxout 0
 
-#define Gimbal_Yaw_Speed_Kp 9000
-#define Gimbal_Yaw_Speed_Ki 0
+#define Gimbal_Yaw_Speed_Kp 5000
+#define Gimbal_Yaw_Speed_Ki 4
 #define Gimbal_Yaw_Speed_Kd 0
 #define Gimbal_Yaw_Speed_Maxout 25000
 #define Gimbal_Yaw_Speed_IMaxout 5000
