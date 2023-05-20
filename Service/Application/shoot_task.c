@@ -107,7 +107,7 @@ void Shoot_Mode_Set(Shoot_t* Mode_Set)
 						
 						uint8_t Shoot_Judge_Permit_Signal = 1;
 						if(Is_Judge_Online())
-							Shoot_Judge_Permit_Signal = Mode_Set->Judge_Shoot_Cooling_Heat < (Mode_Set->Judge_Shoot_Cooling_Limit - 110);
+							Shoot_Judge_Permit_Signal = Mode_Set->Judge_Shoot_Cooling_Heat < (Mode_Set->Judge_Shoot_Cooling_Limit - 100);
 												
 						//电机堵转信号
 						uint8_t Trigger_Motor_Stall_Signal = 0;
@@ -284,11 +284,18 @@ uint8_t Get_Shoot_Freq_From_Judge_System(Shoot_t* Get_Shoot_Freq)
 
 float Get_Fric_Speed_From_Judge_System(Shoot_t* Get_Fric_Speed)
 {
-		if(Is_Judge_Online())
+		
+	if(Is_Judge_Online())
 		{
-				return Get_Fric_Speed->Judge_Shoot_Speed_Limit*0.9;
+			
+				if(Get_Fric_Speed->Judge_Shoot_Speed_Limit <= 14)    //比赛中英雄的射击初速度只有两个 10或者16
+						return Get_Fric_Speed->Judge_Shoot_Speed_Limit*1.32;
+				else if(Get_Fric_Speed->Judge_Shoot_Speed_Limit >= 16)
+						return Get_Fric_Speed->Judge_Shoot_Speed_Limit*1.32;
+				
 		}
-		return Get_Fric_Speed->Default_Shoot_Speed_Limit;
+		
+		return Get_Fric_Speed->Default_Shoot_Speed_Limit*1.32;
 }
 
 
@@ -321,6 +328,7 @@ void Shoot_Control_Data_Set(Shoot_t* Control_Data_Set)
 		if(Control_Data_Set->Shoot_Mode != SHOOT_STOP)
 		{
 				Control_Data_Set->Fric_Motor_Speed_Set = Get_Fric_Speed_From_Judge_System(Control_Data_Set);
+			  //Control_Data_Set->Fric_Motor_Speed_Set = 20;
 		}
 		else
 		{
