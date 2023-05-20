@@ -140,7 +140,7 @@ void Shoot_Mode_Set(Shoot_t* Mode_Set)
 								}
 						}
 						//在准备射击状态下，如果需要发射的弹丸数目大于0，且枪口热量允许发送，进入发射状态
-						else if(Mode_Set->Shoot_Mode == SHOOT_READY&&(Shoot_Bullet_Once_Signal||Shoot_Bullet_No_Break_Signal)&&Shoot_Judge_Permit_Signal)
+						else if(Mode_Set->Shoot_Mode == SHOOT_READY&&(Shoot_Bullet_Once_Signal||Shoot_Bullet_No_Break_Signal)&&Mode_Set->Shoot_Judge_Permit_Signal)
 						{
 								Mode_Set->Shoot_Mode = SHOOT_BULLET;
 						}
@@ -335,6 +335,12 @@ void Shoot_Control_Data_Set(Shoot_t* Control_Data_Set)
 				Control_Data_Set->Fric_Motor_Speed_Set = 0;
 		}
 		
+		
+		if(!Control_Data_Set->Shoot_Judge_Permit_Signal)
+		{
+				Control_Data_Set->Trigger_Motor_Speed_Set = 0;
+		}
+		
 }
 
 void Shoot_Data_Update(Shoot_t* Data_Update)
@@ -352,6 +358,10 @@ void Shoot_Data_Update(Shoot_t* Data_Update)
 			
 		Data_Update->Judge_Shoot_Heat_Percent = (float)Data_Update->Judge_Shoot_Cooling_Heat/Data_Update->Judge_Shoot_Cooling_Limit;
 		Data_Update->Judge_Shoot_Cool_Percent = (float)Data_Update->Judge_Shoot_Cooling_Rate/Data_Update->Judge_Shoot_Cooling_Limit;
+	
+		Data_Update->Shoot_Judge_Permit_Signal = 1;
+		if(Is_Judge_Online())
+			Data_Update->Shoot_Judge_Permit_Signal = Data_Update->Judge_Shoot_Cooling_Heat < (Data_Update->Judge_Shoot_Cooling_Limit - 100);
 }
 
 float* Get_Trigger_Motor_Current_Data(void)

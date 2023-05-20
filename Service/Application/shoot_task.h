@@ -140,6 +140,7 @@ typedef struct
 	uint16_t Shoot_Mouse_Key_Pressed_Time;
 	uint16_t Trigger_Motor_Low_Speed_Time;
 	uint16_t Need_Shoot_Count;
+	uint8_t Shoot_Judge_Permit_Signal;
 	
 //	uint8_t No_Bullet_Flag;
 	
