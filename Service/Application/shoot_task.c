@@ -158,6 +158,11 @@ void Shoot_Mode_Set(Shoot_t* Mode_Set)
 									Mode_Set->Shoot_Mode=SHOOT_START;
 							}
 							
+//							if(Mode_Set->Shoot_Key != Mode_Set->Shoot_Key_On_Level)
+//							{
+//									Mode_Set->Shoot_Mode=SHOOT_START;
+//							}
+							
 							//在发射弹丸状态下，如果长时间未发弹，检查电机是否卡住了
 							if(Mode_Set->Shoot_Bullet_Time>Mode_Set->Shoot_Bullet_Time_Limit)
 							{
@@ -214,13 +219,22 @@ void Shoot_Mode_Change(Shoot_t* Mode_Change)
 		{
 				Mode_Change->Need_Shoot_Count = 0;
 		}
+		
+		if(Mode_Change->Shoot_Mode != Mode_Change->Last_Shoot_Mode)
+		{
+				//Mode_Change->Trigger_Motor_Speed_Pid.iout = 0;
+				Mode_Change->Trigger_Motor_Speed_Pid.Last_error = 0;
+				Mode_Change->Trigger_Motor_Speed_Pid.Last_Last_error = 0;
+				Mode_Change->Trigger_Motor_Speed_Pid.sum_of_error = 0;
+		}
+		
 		Mode_Change->Last_Shoot_Mode = Mode_Change->Shoot_Mode;
 }
 
 
 void Shoot_Pid_Calc(Shoot_t* Pid_Calc)
 {
-		if(Pid_Calc->Shoot_Mode!=SHOOT_STOP)
+		if(Pid_Calc->Shoot_Mode!=SHOOT_STOP && Pid_Calc->Shoot_Judge_Permit_Signal)
 		{
 				
 				Pid_Calc->Trigger_Motor_Current_Send = pid_calc(&Pid_Calc->Trigger_Motor_Speed_Pid,Pid_Calc->Trigger_Motor_Speed_Get,Pid_Calc->Trigger_Motor_Speed_Set);
@@ -252,7 +266,7 @@ void Shoot_Init(Shoot_t* Data_Init)
 		//初始化PID
 		pid_init(&Data_Init->Fric_Motor_Pid[0],FRIC_MOTOR_LEFT_KP,FRIC_MOTOR_LEFT_KI,FRIC_MOTOR_LEFT_KD,FRIC_MOTOR_LEFT_MAXOUT,FRIC_MOTOR_LEFT_IMAXOUT,1);	
 		pid_init(&Data_Init->Fric_Motor_Pid[1],FRIC_MOTOR_RIGHT_KP,FRIC_MOTOR_RIGHT_KI,FRIC_MOTOR_RIGHT_KD,FRIC_MOTOR_RIGHT_MAXOUT,FRIC_MOTOR_RIGHT_IMAXOUT,1);	
-		pid_init(&Data_Init->Trigger_Motor_Speed_Pid,TRIGGER_MOTOR_SPEED_KP,TRIGGER_MOTOR_SPEED_KI,TRIGGER_MOTOR_SPEED_KD,TRIGGER_MOTOR_SPEED_MAXOUT,TRIGGER_MOTOR_SPEED_IMAXOUT,2);
+		pid_init(&Data_Init->Trigger_Motor_Speed_Pid,TRIGGER_MOTOR_SPEED_KP,TRIGGER_MOTOR_SPEED_KI,TRIGGER_MOTOR_SPEED_KD,TRIGGER_MOTOR_SPEED_MAXOUT,TRIGGER_MOTOR_SPEED_IMAXOUT,1);
 		pid_init(&Data_Init->Trigger_Motor_Angle_Pid,TRIGGER_MOTOR_ANGLE_KP,TRIGGER_MOTOR_ANGLE_KI,TRIGGER_MOTOR_ANGLE_KD,TRIGGER_MOTOR_ANGLE_MAXOUT,TRIGGER_MOTOR_ANGLE_IMAXOUT,1);
 		
 		Data_Init->Bullets_Per_Rotation = BULLETS_PER_ROTATION;
@@ -288,14 +302,15 @@ float Get_Fric_Speed_From_Judge_System(Shoot_t* Get_Fric_Speed)
 	if(Is_Judge_Online())
 		{
 			
-				if(Get_Fric_Speed->Judge_Shoot_Speed_Limit <= 14)    //比赛中英雄的射击初速度只有两个 10或者16
-						return Get_Fric_Speed->Judge_Shoot_Speed_Limit*1.32;
-				else if(Get_Fric_Speed->Judge_Shoot_Speed_Limit >= 16)
-						return Get_Fric_Speed->Judge_Shoot_Speed_Limit*1.32;
+//				if(Get_Fric_Speed->Judge_Shoot_Speed_Limit <= 14)    //比赛中英雄的射击初速度只有两个 10或者16
+//						return Get_Fric_Speed->Judge_Shoot_Speed_Limit*1.32;
+//				else if(Get_Fric_Speed->Judge_Shoot_Speed_Limit >= 16)
+//						return Get_Fric_Speed->Judge_Shoot_Speed_Limit*1.35;
+			return Get_Fric_Speed->Judge_Shoot_Speed_Limit*1.15;
 				
 		}
 		
-		return Get_Fric_Speed->Default_Shoot_Speed_Limit*1.32;
+		return Get_Fric_Speed->Default_Shoot_Speed_Limit;
 }
 
 
@@ -335,7 +350,6 @@ void Shoot_Control_Data_Set(Shoot_t* Control_Data_Set)
 				Control_Data_Set->Fric_Motor_Speed_Set = 0;
 		}
 		
-		
 		if(!Control_Data_Set->Shoot_Judge_Permit_Signal)
 		{
 				Control_Data_Set->Trigger_Motor_Speed_Set = 0;
@@ -361,7 +375,7 @@ void Shoot_Data_Update(Shoot_t* Data_Update)
 	
 		Data_Update->Shoot_Judge_Permit_Signal = 1;
 		if(Is_Judge_Online())
-			Data_Update->Shoot_Judge_Permit_Signal = Data_Update->Judge_Shoot_Cooling_Heat < (Data_Update->Judge_Shoot_Cooling_Limit - 100);
+			Data_Update->Shoot_Judge_Permit_Signal = Data_Update->Judge_Shoot_Cooling_Heat < (Data_Update->Judge_Shoot_Cooling_Limit - 90);
 }
 
 float* Get_Trigger_Motor_Current_Data(void)
